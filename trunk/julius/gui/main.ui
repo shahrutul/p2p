@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>568</width>
+    <height>539</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Peer2Peer 2011</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="lbSuche">
+      <property name="text">
+       <string>Suche:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTreeWidget" name="twSuche">
+      <column>
+       <property name="text">
+        <string>Titel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Ort</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Beschreibung</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="buttonFrame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pbNeu">
+         <property name="text">
+          <string>Neu</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="pbBearbeiten">
+         <property name="text">
+          <string>Bearbeiten</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pbEntfernen">
+         <property name="text">
+          <string>Entfernen</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="lbDetails">
+      <property name="text">
+       <string>Details:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTreeWidget" name="twDetails">
+      <column>
+       <property name="text">
+        <string>Titel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Ort</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Beschreibung</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTreeWidget" name="twAusgabe"/>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
