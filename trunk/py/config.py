@@ -27,6 +27,10 @@ config.settings.store()
 """
 
 import ConfigParser
+import logging
+import sys
+
+
 
 
 class _Container(dict):
@@ -62,6 +66,7 @@ class Config(_Container):
     def __init__(self, file_name='settings.cfg'):
         object.__setattr__(self, "file_name", file_name)
         self.load()
+        self.setup_logger()
         _Container.__init__(self)
 
     def __repr__(self):
@@ -86,7 +91,10 @@ class Config(_Container):
                 try:
                     value = cfg.getint(section, option)
                 except ValueError:
-                    value = cfg.get(section, option)
+                    try:
+                        value = cfg.getfloat(section, option)
+                    except ValueError:
+                        value = cfg.get(section, option)
                 setattr(config_sect, option, value)
 
     def store(self):
@@ -101,9 +109,30 @@ class Config(_Container):
         with open(self.file_name, "w") as cfg_file:
             cfg.write(cfg_file)
 
+    def setup_logger(self):
+        LEVELS = {'debug': logging.DEBUG,
+          'info': logging.INFO,
+          'warning': logging.WARNING,
+          'error': logging.ERROR,
+          'critical': logging.CRITICAL}
+        
+        handler = logging.StreamHandler(sys.stdout) 
+        frm = logging.Formatter("%(asctime)s %(levelname)s: %(message)s", 
+                              "%d.%m.%Y %H:%M:%S") 
+        handler.setFormatter(frm)
+
+        logger = logging.getLogger() 
+        logger.addHandler(handler)
+        logger.setLevel(LEVELS[self.logs.active_level])
+        self.logs.levels = LEVELS.keys()
+        self.logs.logger = logger
+            
+
 
 # Initialises the module and creates 'virtual submodules'
 # for short-form-access (e.g config.network)
 locals()['settings'] = Config()
 for _section, _options in locals()['settings'].items():
     locals()[_section] = _options
+
+
