@@ -1,4 +1,4 @@
-#! /Usr/bin/env python
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """ Asyncore/asychat "mutated" to a network-nerve.

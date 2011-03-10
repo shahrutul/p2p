@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
 """ Network protocol module. Converts python messages from/to JSON objects.
 Format: an JSON object with type and content attributes:
 
@@ -32,15 +34,15 @@ query(mydata, ttl, hops)
 
 Datastructs:
 # pong: reply to ping with contact data
-pong(addr)
+pong(IP, port)
 
 # addr: IP address
 addr(IP, port)
 # args: string, number
 
 # query hit: reply to a query
-query_hit(addr, data)
-# args: addr, object
+query_hit(IP, port, data)
+# args: string, number, object
 # returns: nothing
 """
 import json

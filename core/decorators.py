@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
 # http://www.dabeaz.com/coroutines/coroutine.py
 # coroutine.py
 #
