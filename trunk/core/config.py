@@ -32,7 +32,6 @@ import sys
 
 
 
-
 class _Container(dict):
     """ A simple&lightweight container/struct class """
 
@@ -64,7 +63,9 @@ class Config(_Container):
     """ A configuration reader/parser/writer class """
 
     def __init__(self, file_name='settings.cfg'):
+        ignore = ['logger']
         object.__setattr__(self, "file_name", file_name)
+        object.__setattr__(self, "ignore", ignore)
         self.load()
         self.setup_logger()
         _Container.__init__(self)
@@ -76,6 +77,7 @@ class Config(_Container):
                 result.append(setting + "." + option + " = " + str(value))
 
         return "\n".join(result)
+
 
     def load(self):
         """ Loads a config file and creates for every section/option entry
@@ -96,15 +98,38 @@ class Config(_Container):
                     except ValueError:
                         value = cfg.get(section, option)
                 setattr(config_sect, option, value)
+        # parse neighbours:
+        try:
+            self.last_known_neighbours.default_bootstrap =\
+                self.network.backup_neighbour
+            for neighbour in self.last_known_neighbours:                
+                ip, port = self.last_known_neighbours[neighbour].split(':')
+                self.last_known_neighbours[neighbour] = (ip.strip(), int(port))                
+        except ValueError, reason:
+            raise ValueError("Error while reading %s!" %
+                             self.file_name, reason)
 
     def store(self):
         """ Stores changed data in configuration file format """
-
         cfg = ConfigParser.SafeConfigParser()
         for setting in self:
             cfg.add_section(setting)
+            if setting == 'last_known_neighbours':
+                name = 'neighbour%s'
+                i = 0
+                try:
+                    for ip, port in self[setting]:
+                        i += 1
+                        cfg.set(setting, name % i, "%s:%s" %(ip, port))
+                except ValueError, reason:
+                   self.logs.logger.warning("Please pass a new/updated neighbourlist!")
+                   continue
+                else:
+                    continue
+                
             for option, value in self[setting].items():
-                cfg.set(setting, option, str(value))
+                if option not in self.ignore:
+                    cfg.set(setting, option, str(value))
 
         with open(self.file_name, "w") as cfg_file:
             cfg.write(cfg_file)

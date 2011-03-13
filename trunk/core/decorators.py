@@ -25,3 +25,16 @@ def singleton(cls):
             instances[cls] = cls()
         return instances[cls]
     return getinstance
+
+def single_coroutine(func):
+    generator = {}
+    def start():
+        if func not in generator:
+            cr = func()
+            cr.next()
+            generator[func] = cr
+            return cr
+        else:
+            return generator[func]
+    return start
+        

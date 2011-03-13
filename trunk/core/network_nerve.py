@@ -13,7 +13,7 @@ How it works:
 4.transmits distinct signals over distinct synapses to a filter neuron.
 
 Filters signals and/or transmits them to the output.
-Provides some organ_id/synapse_id for further communication.
+Provides the responsible synapse for further communication.
 
                            +-------+
 +-----+            ------->|synapse|-------
@@ -32,7 +32,7 @@ n.associate(output)
 The 'output' is a coroutine or an object implementing 'send' method
 and consumes incoming signals.
 
-Signal format: (organ_id/synapse, signal)
+Signal format: (synapse, signal)
 
 Attention:
 Neurons need energy to transport their neurotransmitters!
@@ -47,7 +47,7 @@ import asynchat
 import asyncore
 import socket
 
-from decorators import coroutine
+from decorators import coroutine, single_coroutine
 from config import network, logs
 from signal_protocol import Signal, ProtocolError
 
@@ -58,19 +58,19 @@ def signal_transmitter():
         while True:
             synapse, signal = (yield)            
             if synapse.is_active():
-                try:
-                    synapse.push(signal.serialize())
-                    logs.logger.debug("signal_transmitter: %s, %s" %
-                                      (synapse, signal))
-                except ProtocolError, reason:
-                    logs.logger.debug("signal_transmitter error: %s, %s" %
-                                      (synapse, reason))                
+                synapse.push(signal.serialize())
+                logs.logger.debug("signal_transmitter: %s, %s" %
+                                  (synapse, signal))
+                
     finally:
         logs.logger.debug("signal_transmitter closed")
-        
+
 @coroutine
-def signal_filter(target, transmitter):
-    """ Collects and validates input messages from synapses """
+def signal_filter(transmitter):
+    """ Collects and validates input messages from synapses.
+    Transmits errors back to the sender. Passes signals to synapse's
+    signal_processor.
+    """
     try:
         while True:       
             synapse, data = (yield)
@@ -85,7 +85,7 @@ def signal_filter(target, transmitter):
                 transmitter.send((synapse, err_response))
                 synapse.disconnect()
             else:                
-                target.send((synapse, signal))
+                synapse.signal_target.send((synapse, signal))
     finally:
         logs.logger.debug("signal filter closed")
 
@@ -93,27 +93,34 @@ def signal_filter(target, transmitter):
 class _Synapse(asynchat.async_chat):
     """ Asynchronous network channel mutated to a synapse."""
 
-    def __init__(self, sock, organ_id, target):
+    def __init__(self, sock, organ_id, signal_filter, signal_target):
         asynchat.async_chat.__init__(self, sock)
         if sock is None:
-            print "connect"
             self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
             self.connect(organ_id)
+            
         self.organ_id = organ_id     
         self.set_terminator(Signal.TERMINATOR)
+        self.signal_filter = signal_filter
+        self.signal_target = signal_target
         self.buffer = []
-        self.target = target
+        self.active = True
         self.collect_incoming_data = self.buffer.append
 
     def found_terminator(self):
-        """ Sends received message to target and clears input buffer"""
-        logs.logger.debug("%s sends data to %s" % (self, self.target.__name__))
-        self.target.send((self, "".join(self.buffer)))
+        """ Sends signal to a decoder/filter and clears input buffer"""
+        logs.logger.debug("%s sends data to %s" % (self, self.signal_filter.__name__))
+        self.signal_filter.send((self, "".join(self.buffer)))
         del(self.buffer[:])        
-        
+
     def is_active(self):
         """ provides information about synapse activity """
-        return (self.accepting  == True) or (self.connected == True)
+        return (self.active == True)
+
+    def handle_close(self):
+        """ closed or failed connections """
+        self.active = False
+        self.close()
 
     def disconnect(self):
         """ flushes data and closes """
@@ -122,7 +129,7 @@ class _Synapse(asynchat.async_chat):
 
     def __str__(self):
         """ A nice string representation for logging module """
-        return "Synapse(%s <-> %s)" % (self.organ_id, self.target.__name__)
+        return "Synapse(%s <-> %s)" % (self.organ_id, self.signal_target.__name__)
     
     def log(self, message):
         """ Overrides 'log' from asyncore module to produce consistent logs """
@@ -141,9 +148,9 @@ class NeuronError(Exception):
 class NetworkNeuron(asyncore.dispatcher):
     """ Provides asynchronous network communication, represented by a
     neuronal connection.
-    Expects: some output consumer (coroutine or an object implementing 'send' )
+
     Output format: (organ_id/synapse, message)"""
-    def __init__(self, port=network.server_port):       
+    def __init__(self, port=network.server_port):
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         port_range = network.server_port_range + port
@@ -164,12 +171,15 @@ class NetworkNeuron(asyncore.dispatcher):
             raise NeuronError(reason)
         
         logs.logger.debug("listen to: %s" % port)
+        self.signal_processor = None
         self.signal_transmitter = signal_transmitter()
+        self.signal_filter = signal_filter(self.signal_transmitter)
 
-    def associate(self, target):
-        """ connect with an putput processor """
-        self.signal_filter = signal_filter(target, self.signal_transmitter)
-        
+    def associate(self, input_signal_processor):
+        """ Associates the neuron with some output consumer/processor
+        (coroutine or an object implementing 'send' ) """
+        self.signal_processor = input_signal_processor
+
     def log(self, message):
         """ Overrides 'log' from asyncore module to produce consistent logs """
         logs.logger.debug("asyncore log: %s" % message)
@@ -178,17 +188,33 @@ class NetworkNeuron(asyncore.dispatcher):
         """ Overrides 'log_info from asyncore module (->consistent logs) """
         logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
 
-    def connect(self, organ_id, target):
-        return _Synapse(None, organ_id, target)
+    def connect(self, organ_id, target = None):
+        if not target:
+            target = self.signal_processor
+        #TODO: is target really needed?
+        return _Synapse(None, organ_id, self.signal_filter, target)
+
+    def handle_expt(self):
+        # connection failed
+        print "close"
+        self.close()
         
     def handle_accept(self):
+        if self.signal_processor is None:
+            raise NeuronError("There is no output/signal_processor "+\
+                                  "associated with the NetworkNeuron!")
         sock, organ_id = self.accept()
         logs.logger.debug("accepts: %s" % [organ_id])
         logs.logger.debug("connections: %s" % len(self._map))
-        _Synapse(sock, organ_id, self.signal_filter)
+        _Synapse(sock, organ_id, self.signal_filter, self.signal_processor)
 
     def feed(self, amount = network.default_listen_time):
         """ Feeds the neuron with some time. Neuron spends this time for
         network transmissions."""
-        asyncore.loop(timeout = amount, count = 10)
+        asyncore.loop(timeout = amount, count = 1)
+
+    def suspend(self):
+        for connection in self._map.values():
+            connection.close()
+
         
