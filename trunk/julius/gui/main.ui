@@ -101,7 +101,13 @@
      </widget>
     </item>
     <item>
-     <widget class="QTreeWidget" name="twAusgabe"/>
+     <widget class="QTreeWidget" name="twLog">
+      <column>
+       <property name="text">
+        <string>Log</string>
+       </property>
+      </column>
+     </widget>
     </item>
    </layout>
   </widget>
