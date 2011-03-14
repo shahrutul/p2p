@@ -38,9 +38,9 @@ class Ui_MainWindow(object):
         self.pbEntfernen.setObjectName("pbEntfernen")
         self.gridLayout.addWidget(self.pbEntfernen, 0, 2, 1, 1)
         self.verticalLayout.addWidget(self.buttonFrame)
-        self.lbDetails = QtGui.QLabel(self.centralwidget)
-        self.lbDetails.setObjectName("lbDetails")
-        self.verticalLayout.addWidget(self.lbDetails)
+        self.lbErgebnisse = QtGui.QLabel(self.centralwidget)
+        self.lbErgebnisse.setObjectName("lbErgebnisse")
+        self.verticalLayout.addWidget(self.lbErgebnisse)
         self.twDetails = QtGui.QTreeWidget(self.centralwidget)
         self.twDetails.setObjectName("twDetails")
         self.verticalLayout.addWidget(self.twDetails)
@@ -52,7 +52,6 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Peer2Peer 2011", None, QtGui.QApplication.UnicodeUTF8))
         self.lbSuche.setText(QtGui.QApplication.translate("MainWindow", "Suche:", None, QtGui.QApplication.UnicodeUTF8))
@@ -62,7 +61,7 @@ class Ui_MainWindow(object):
         self.pbNeu.setText(QtGui.QApplication.translate("MainWindow", "Neu", None, QtGui.QApplication.UnicodeUTF8))
         self.pbBearbeiten.setText(QtGui.QApplication.translate("MainWindow", "Bearbeiten", None, QtGui.QApplication.UnicodeUTF8))
         self.pbEntfernen.setText(QtGui.QApplication.translate("MainWindow", "Entfernen", None, QtGui.QApplication.UnicodeUTF8))
-        self.lbDetails.setText(QtGui.QApplication.translate("MainWindow", "Details:", None, QtGui.QApplication.UnicodeUTF8))
+        self.lbErgebnisse.setText(QtGui.QApplication.translate("MainWindow", "Ergebnisse:", None, QtGui.QApplication.UnicodeUTF8))
         self.twDetails.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Titel", None, QtGui.QApplication.UnicodeUTF8))
         self.twDetails.headerItem().setText(1, QtGui.QApplication.translate("MainWindow", "Ort", None, QtGui.QApplication.UnicodeUTF8))
         self.twDetails.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Beschreibung", None, QtGui.QApplication.UnicodeUTF8))
