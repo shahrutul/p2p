@@ -1,6 +1,11 @@
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
+# gui_main.py
+#
+# The main class for the GUI.
 
 from PySide import QtCore, QtGui
+from time import localtime, strftime
 import sys
 
 class Ui_MainWindow(object):
@@ -47,6 +52,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Peer2Peer 2011", None, QtGui.QApplication.UnicodeUTF8))
         self.lbSuche.setText(QtGui.QApplication.translate("MainWindow", "Suche:", None, QtGui.QApplication.UnicodeUTF8))
@@ -69,6 +75,7 @@ class MyMainWindow(QtGui.QMainWindow):
         self.log("Neu wurde angeklickt!")
         self.addDummySearch()
     
+    
     def pbBearbeitenClick(self):
         self.log("Bearbeiten wurde angeklickt!")
         item = self.ui.twSuche.currentItem()
@@ -77,17 +84,34 @@ class MyMainWindow(QtGui.QMainWindow):
             return
         index = self.ui.twSuche.indexOfTopLevelItem(item)
         print index
+    
         
     def pbEntfernen(self):
         self.log("Entfernen wurde angeklickt!")
     
+    
     def twSucheItemClicked(self, item = None, columnIndex = None): 
         self.log("Suchefeld angeklickt.")
         if columnIndex != None:
-            print item
-            print columnIndex
+            pass
     
-    ''' ... '''
+            
+    '''
+    def twSucheItemDoubleClicked(self, item = None, columnIndex = None):
+        self.log("Suchefeld doppelt angeklickt.")
+        if columnIndex != None:
+            self.pbBearbeitenClick()
+    '''
+    
+    
+    def twDetailsItemDoubleClicked(self, item = None, columnIndex = None):
+        self.log("Detailfeld doppelt angeklickt.")
+        if columnIndex != None:
+            pass
+
+    
+    ''' ##################################################################### '''
+
     
     def addDummySearch(self):
         newItem = QtGui.QTreeWidgetItem(self.ui.twSuche)
@@ -97,18 +121,15 @@ class MyMainWindow(QtGui.QMainWindow):
         self.ui.twLog.addTopLevelItem(newItem)
 
 
-        
-    def clearLog(self):
-        self.ui.twLog.clear()
-        print "Hello World"
-        
-        
     def log(self, inString):
+        sItemText = strftime("%H:%M:%S", localtime()) + ": " + inString
         newItem = QtGui.QTreeWidgetItem(self.ui.twLog)
-        newItem.setText(0, inString)
+        newItem.setText(0, sItemText)
         self.ui.twLog.addTopLevelItem(newItem)
+        ''' always scroll '''
+        self.ui.twLog.setCurrentItem(newItem)
         
-    
+        
     def __init__(self, parent=None):
         super(MyMainWindow, self).__init__(parent)
         self.ui = Ui_MainWindow()
@@ -119,6 +140,9 @@ class MyMainWindow(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.pbBearbeiten, QtCore.SIGNAL('clicked()'), self.pbBearbeitenClick)
         QtCore.QObject.connect(self.ui.pbEntfernen, QtCore.SIGNAL('clicked()'), self.pbEntfernen)
         QtCore.QObject.connect(self.ui.twSuche, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), self.twSucheItemClicked)
+        '''QtCore.QObject.connect(self.ui.twSuche, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.twSucheItemDoubleClicked)'''
+        QtCore.QObject.connect(self.ui.twDetails, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.twDetailsItemDoubleClicked)
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
@@ -128,5 +152,5 @@ if __name__ == "__main__":
     
 '''
         msgBox = QtGui.QMessageBox.question(self, 'Ueberschrift', "Die Nachricht ....", QtGui.QMessageBox.Ok)
-
+self.ui.twLog.clear()
 '''
