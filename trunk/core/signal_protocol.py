@@ -48,12 +48,12 @@ query_hit(IP, port, data)
 # returns: nothing
 """
 import json
-from collections import namedtuple
 from config import logs  # pylint: disable=E0611
 
 
 class ProtocolError(Exception):  # pylint: disable=C0111
     pass
+
 
 def arg_type_check(types, *args):
     """ Provides argument type checking.
@@ -65,10 +65,11 @@ def arg_type_check(types, *args):
     for arg, type_ in zip(args, types):
         if not isinstance(arg, type_):
             return False
-        
+
     return True
 
-class Signal():
+
+class Signal(object):
     """ Provides common signals for communication and
     a message to/from JSON converter. Accepts 'registered'
     signals only. """
@@ -77,25 +78,27 @@ class Signal():
     # errors:
     ProtocolError = "ProtocolError"
     # implemented signals with name and argument types
-    _types = {'error' : (basestring, basestring),
-              'whoami' :(),
-              'youare': (basestring, int)
+    _types = {'error': (basestring, basestring),
+              'whoami': (),
+              'youare': (basestring, int),
+              'ping': (basestring, int, int),
+              'pong': (basestring, int)
              }
-    
-    def __init__(self, type_, content = ()):        
+
+    def __init__(self, type_, content=()):
         try:
             arg_types = Signal._types[type_]
             if not arg_type_check(arg_types, *content):
                 raise ProtocolError("Expected: %s(%s), not %s(%s)" %
                                     (type_, arg_types, type_, content))
-        except (ValueError, TypeError, KeyError), reason:
+        except (ValueError, TypeError, KeyError):
             raise ProtocolError("type = %s, content = %s" % (type_, content))
-        
+
         self.type = type_
         self.content = content
 
     def __str__(self):
-        return "Signal(%s,%s)" %(self.type, self.content)
+        return "Signal(%s,%s)" % (self.type, self.content)
 
     @staticmethod
     def deserialize(data):
@@ -107,7 +110,7 @@ class Signal():
         except (TypeError, ValueError), reason:
             raise ProtocolError(data, reason)
         except KeyError:
-            err = """Expected: '{"%s":"x", "%s":["y","z"]}', not %s""" %\
+            err = """Expected: '{"%s":"x", "%s":["y","z"]}', not %s""" % \
                   ('type', 'content', data)
             raise ProtocolError(err)
 
@@ -116,9 +119,8 @@ class Signal():
         Returns: JSON representation, e.g """
         logs.logger.debug("serialize: %s", self)
         try:
-            return json.dumps({'type' :self.type,
-                               'content':self.content}) + Signal.TERMINATOR
+            return json.dumps({'type': self.type,
+                               'content: self.content}) + Signal.TERMINATOR
         except (TypeError), reason:
             logs.logger.critical("serializer exception, reason %s" % reason)
             raise ProtocolError(reason)
-        

@@ -31,7 +31,6 @@ import logging
 import sys
 
 
-
 class _Container(dict):
     """ A simple&lightweight container/struct class """
 
@@ -61,11 +60,10 @@ class _Container(dict):
 
 class Config(_Container):
     """ A configuration reader/parser/writer class """
+    ignore = ['logger']
 
     def __init__(self, file_name='settings.cfg'):
-        ignore = ['logger']
         object.__setattr__(self, "file_name", file_name)
-        object.__setattr__(self, "ignore", ignore)
         self.load()
         self.setup_logger()
         _Container.__init__(self)
@@ -77,7 +75,6 @@ class Config(_Container):
                 result.append(setting + "." + option + " = " + str(value))
 
         return "\n".join(result)
-
 
     def load(self):
         """ Loads a config file and creates for every section/option entry
@@ -100,11 +97,10 @@ class Config(_Container):
                 setattr(config_sect, option, value)
         # parse neighbours:
         try:
-            self.last_known_neighbours.default_bootstrap =\
-                self.network.backup_neighbour
-            for neighbour in self.last_known_neighbours:                
-                ip, port = self.last_known_neighbours[neighbour].split(':')
-                self.last_known_neighbours[neighbour] = (ip.strip(), int(port))                
+            for sect in [self.fallback_servers, self.last_known_neighbours]:
+                for neighbour in sect:
+                    ip_addr, port = sect[neighbour].split(':')
+                    sect[neighbour] = (ip_addr.strip(), int(port))
         except ValueError, reason:
             raise ValueError("Error while reading %s!" %
                              self.file_name, reason)
@@ -118,46 +114,52 @@ class Config(_Container):
                 name = 'neighbour%s'
                 i = 0
                 try:
-                    for ip, port in self[setting]:
+                    for ip_addr, port in self[setting]:
                         i += 1
-                        cfg.set(setting, name % i, "%s:%s" %(ip, port))
-                except ValueError, reason:
-                   self.logs.logger.warning("Please pass a new/updated neighbourlist!")
-                   continue
-                else:
+                        cfg.set(setting, name % i, "%s:%s" % (ip_addr, port))
+                except ValueError:
+                    self.logs.logger.warning("Please pass a new/updated" +
+                                            "neighbourlist!")
                     continue
-                
-            for option, value in self[setting].items():
-                if option not in self.ignore:
-                    cfg.set(setting, option, str(value))
+
+            elif setting == 'fallback_servers':
+                try:
+                    for value in self[setting]:
+                        cfg.set(setting, value, "%s:%s" % self[setting][value])
+                except ValueError:
+                    continue
+            else:
+                for option, value in self[setting].items():
+                    if option not in Config.ignore:
+                        cfg.set(setting, option, str(value))
 
         with open(self.file_name, "w") as cfg_file:
             cfg.write(cfg_file)
 
     def setup_logger(self):
-        LEVELS = {'debug': logging.DEBUG,
-          'info': logging.INFO,
-          'warning': logging.WARNING,
-          'error': logging.ERROR,
-          'critical': logging.CRITICAL}
-        
-        handler = logging.StreamHandler(sys.stdout) 
-        frm = logging.Formatter("%(asctime)s %(levelname)s: %(message)s", 
-                              "%d.%m.%Y %H:%M:%S") 
+        """ Creates a logger.Usage: settings.logs.logger.debug('x') """
+        levels = {'debug': logging.DEBUG,
+                  'info': logging.INFO,
+                  'warning': logging.WARNING,
+                  'error': logging.ERROR,
+                  'critical': logging.CRITICAL}
+
+        if self.logs.logfile != '':
+            handler = logging.FileHandler(self.logs.logfile)
+        else:
+            handler = logging.StreamHandler(sys.stdout)
+        frm = logging.Formatter("%(asctime)s %(levelname)s: %(message)s",
+                              "%d.%m.%Y %H:%M:%S")
         handler.setFormatter(frm)
 
-        logger = logging.getLogger() 
+        logger = logging.getLogger()
         logger.addHandler(handler)
-        logger.setLevel(LEVELS[self.logs.active_level])
-        self.logs.levels = LEVELS.keys()
+        logger.setLevel(levels[self.logs.active_level])
+        self.logs.levels = levels.keys()
         self.logs.logger = logger
-            
-
 
 # Initialises the module and creates 'virtual submodules'
 # for short-form-access (e.g config.network)
 locals()['settings'] = Config()
 for _section, _options in locals()['settings'].items():
     locals()[_section] = _options
-
-
