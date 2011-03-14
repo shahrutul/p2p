@@ -24,8 +24,9 @@ ping(ping_id, ttl, hops)
 # returns: at least one pong
 
 
-# whoami: discover own IP address
-whoami()
+# whoami: discover own IP address and invite for neighbourship
+whoami(port)
+# args: number
 # returns: youare
 
 # query: search for data
@@ -120,7 +121,7 @@ class Signal(object):
         logs.logger.debug("serialize: %s", self)
         try:
             return json.dumps({'type': self.type,
-                               'content: self.content}) + Signal.TERMINATOR
+                               'content': self.content}) + Signal.TERMINATOR
         except (TypeError), reason:
             logs.logger.critical("serializer exception, reason %s" % reason)
             raise ProtocolError(reason)
