@@ -61,6 +61,7 @@ def ping_processor(brain):
 
             if ping_id in brain.ping_cache:
                 logs.logger.debug("discard ping request %s" % str(ping))
+                synapse.disconnect()
                 continue
             else:
                 brain.ping_cache[ping_id] = time_stamp()
@@ -110,14 +111,9 @@ def network_explorer(brain):
                               % explore_level)
             for neigh in brain.neighbours.keys():
                 pinger.send((explore_level, neigh))
-                #ping_id = str(uuid.uuid1())
-                #brain.ping_cache[ping_id] = time_stamp()
-                #synapse = brain.network_neuron.connect(neigh)
-                #synapse.transmit(Signal('ping', (ping_id, explore_level, 0)))
                 wait = Wait(network.explore_step_timeout)
                 while wait:
                     yield
-                #synapse.disconnect()
         else:
             # max explore level reached, wait for longer time and retry:
             wait = Wait(network.explore_round_timeout)
@@ -220,12 +216,8 @@ def network_interaction(brain):
                     neighbour not in brain.neigh_refresh):
                     brain.neigh_refresh[neighbour] = timestamp
                     pinger.send((1, neighbour))
-                   # ping_id = str(uuid.uuid1())
-                   # brain.ping_cache[ping_id] = time_stamp()
-                   # synapse = brain.network_neuron.connect(neighbour)
                     logs.logger.debug("sends a refresh ping to %s" %
                                       str(neighbour))
-                   # synapse.transmit(Signal('ping', (ping_id, 1, 0)))
 
 
 @coroutine
@@ -325,6 +317,7 @@ class Brain(object):
     def resume(self):
         """ Resumes from suspend. Initializes all interfaces """
         self.ping_cache = {}
+        self.interaction_pause = Wait(2)
         self.neigh_candidates = TimeStampDict()
         self.neigh_refresh = TimeStampDict()
 
@@ -350,11 +343,13 @@ class Brain(object):
     def process(self, amount=network.default_listen_time):
         """ process incoming signals and generates some active output
         (pings neighbours, explores the network) """
-        self.network_neuron.feed(amount)  # TODO: reset default listen
+        self.network_neuron.feed(amount)
         # it is not necessary to call it more than few times in a second.
         # No active interactions without neighbours:
         if (len(self.neighbours) > 0) or (len(self.neigh_candidates) > 0):
-            self.network_interaction.next()
+            if not self.interaction_pause:
+                self.interaction_pause = Wait(2)
+                self.network_interaction.next()
         elif not self.fallback:
             # fallback to well known servers
             self.fallback = True
@@ -363,4 +358,4 @@ class Brain(object):
                               str(self.neighbours.keys()))
         else:
             # hm, we have a problem!
-            self.errors_to_ui.send("No known neighbours for bootstrapping!")
+            self.errors_to_ui.send("No known neighbours!")
