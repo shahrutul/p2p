@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PySide import QtCore, QtGui
+from time import localtime, strftime
 
 class Ui_DetailsWindow(object):
     def setupUi(self, DetailsWindow):
@@ -156,13 +157,19 @@ class MyDetailsWindow(QtGui.QDialog):
     def tabCurrentChanged(self, id):
         if id == 1:
             self.ui.leNachricht.setFocus()
-
         
     def pbSendenClicked(self):
-        if len(self.ui.leNachricht.text()) <= 0:
+        self.chatMessage = self.ui.leNachricht.text()
+        if len(self.chatMessage) <= 0:
             self.ui.leNachricht.setFocus()
             return
-        self.ui.pteChat.insertPlainText("Ich: " + self.ui.leNachricht.text() + "\n")
+        self.ui.pteChat.insertPlainText("[" + strftime("%H:%M:%S", localtime()) + "] Ich: " + self.chatMessage + "\n")
+        
+        ''' AutoScroll '''
+        self.ui.pteChat.verticalScrollBar().setValue(self.ui.pteChat.verticalScrollBar().maximum())
+        
+        ''' Todo: chatMessage verschicken --> Brain '''
+        
         self.ui.leNachricht.setText("")
         self.ui.leNachricht.setFocus()
         
