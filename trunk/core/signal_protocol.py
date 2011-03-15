@@ -80,7 +80,7 @@ class Signal(object):
     ProtocolError = "ProtocolError"
     # implemented signals with name and argument types
     _types = {'error': (basestring, basestring),
-              'whoami': (),
+              'whoami': (int,),
               'youare': (basestring, int),
               'ping': (basestring, int, int),
               'pong': (basestring, int)
@@ -89,10 +89,13 @@ class Signal(object):
     def __init__(self, type_, content=()):
         try:
             arg_types = Signal._types[type_]
+            if not hasattr(content, '__iter__'):
+                content = (content,)
             if not arg_type_check(arg_types, *content):
                 raise ProtocolError("Expected: %s(%s), not %s(%s)" %
                                     (type_, arg_types, type_, content))
-        except (ValueError, TypeError, KeyError):
+        except (ValueError, TypeError, KeyError), reason:
+            print reason
             raise ProtocolError("type = %s, content = %s" % (type_, content))
 
         self.type = type_
