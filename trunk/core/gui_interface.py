@@ -4,19 +4,20 @@
 #
 # The interface connects the brain and GUI.
 
+from gui_main import myMainWindow
 
 
 ''' ###### 1 ######'''
 ''' GUI --> brain '''
-def createNewSearchEntry(newSearchEntry):
+def createNewQueryEntry(newSearchEntry):
     pass
 
 ''' brain --> GUI '''
-def reloadSearchEntries():
+def reloadQueryEntries():
     pass
 
 ''' GUI --> brain '''
-def getAllSearchEntries():
+def getAllQueryEntries():
     pass
 
 ''' HINWEIS: reloadSearchEntries oder getAllSearchEntries eventuell überflüssig '''
@@ -25,30 +26,30 @@ def getAllSearchEntries():
 
 ''' ###### 2 ###### '''
 ''' GUI --> brain '''
-def getSearchEntryById(id):
+def getQueryEntryById(id):
     pass
 
 ''' GUI --> brain '''
-def setSearchEntryById(id, data):
+def setQueryEntryById(id, data):
     pass
 
 ''' ###### 2.1 ###### '''
 ''' GUI --> brain '''
-def deleteSearchEntryById(id):
+def deleteQueryEntryById(id):
     pass
 
 
 
 ''' ###### 3 ###### '''
 ''' brain --> GUI '''
-def reloadResultsForSearchId(id):
+def reloadResultsForQueryId(id):
     pass
 
 
 
 ''' ###### 4 ###### '''
 ''' GUI --> brain '''
-def getDetailResult(searchId, resultId):
+def getDetailResult(queryId, resultId):
     pass
 
 
@@ -64,3 +65,9 @@ def sendChatMsg(msg, receiver):
 ''' brain --> GUI '''
 def pickupChatMsg():
     pass
+
+
+''' ###### 7 ###### '''
+''' brain --> GUI '''
+def logMessage(msg):
+    myMainWindow.log(msg)
