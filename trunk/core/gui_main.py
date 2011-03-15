@@ -70,7 +70,7 @@ class Ui_MainWindow(object):
         
         
         
-class MyMainWindow(QtGui.QMainWindow):
+class MyMainWindow(QtGui.QMainWindow):    
     def pbNeuClick(self):
         self.log("Neu wurde angeklickt!")
         self.addDummySearch()
@@ -130,6 +130,7 @@ class MyMainWindow(QtGui.QMainWindow):
         self.ui.twLog.setCurrentItem(newItem)
         
         
+        
     def __init__(self, parent=None):
         super(MyMainWindow, self).__init__(parent)
         self.ui = Ui_MainWindow()
@@ -147,6 +148,13 @@ class MyMainWindow(QtGui.QMainWindow):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myMainWindow = MyMainWindow()
+    
+    myMainWindow.brain = Brain()
+    
+    brainTimer = QtCore.QTimer()
+    QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
+    brainTimer.start(1)
+    
     myMainWindow.show()
     sys.exit(app.exec_())
     
