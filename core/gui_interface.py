@@ -4,7 +4,28 @@
 #
 # The interface connects the brain and GUI.
 
-from gui_main import myMainWindow
+#from gui_main import myMainWindow
+
+class QueryTime(object):
+    """ Query time data storage struct """
+    WEEKDAYS = ["mo", "tue", "wed", "thu", "fri", "sat", "sun"]
+    class Weekday: mo, tue, wed, thu, fri, sat, sun = QueryTime.WEEKDAYS
+    def __init__(self, from_hour, from_minute, until_hour,
+                 until_minute, weekdays):
+        self.from_hour = from_hour
+        self.from_minute = from_minute
+        self.until_hour = until_hour
+        self.until_minute = until_minute
+        self.weekdays = weekdays
+        
+class Query(object):
+    """ Query data struct for gui communications"""
+    def __init__(self, title, place, query_time, description, id_=None):        
+        self.title = title
+        self.place = place
+        self.query_time = query_time
+        self.description = description
+        self.id = id_
 
 
 ''' ###### 1 ######'''
