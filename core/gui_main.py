@@ -4,7 +4,7 @@
 #
 # The main class for the GUI.
 
-from "../core/brain" import Brain
+from brain import Brain
 from PySide import QtCore, QtGui
 from time import localtime, strftime
 import sys
@@ -146,8 +146,8 @@ class MyMainWindow(QtGui.QMainWindow):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    myapp = MyMainWindow()
-    myapp.show()
+    myMainWindow = MyMainWindow()
+    myMainWindow.show()
     sys.exit(app.exec_())
     
 '''
