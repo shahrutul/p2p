@@ -82,17 +82,22 @@ class MyMainWindow(QtGui.QMainWindow):
     
     def pbBearbeitenClicked(self):
         self.log("Bearbeiten wurde angeklickt!")
+        '''
         item = self.ui.twSuche.currentItem()
         if not item:
             self.log("Kein Item ausgewaehlt!")
             return
         index = self.ui.twSuche.indexOfTopLevelItem(item)
         print index
+        '''
     
         
     def pbEntfernenClicked(self):
         self.log("Entfernen wurde angeklickt!")
         self.myDetailsWindow = MyDetailsWindow()
+        self.myDetailsWindow.ui.tabs.setCurrentIndex(0)
+        ''' Todo: chat(1) wieder rausnehmen '''
+        self.myDetailsWindow.ui.tabs.setTabText(1, "Chat (1)")
         self.myDetailsWindow.show()
     
     

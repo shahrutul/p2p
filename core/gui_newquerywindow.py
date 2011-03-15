@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PySide import QtCore, QtGui
+from gui_interface import *
 
 class Ui_NewQueryWindow(object):
     def setupUi(self, NewQueryWindow):
@@ -130,16 +131,36 @@ class MyNewQueryWindow(QtGui.QDialog):
             QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte einen Titel angeben!", QtGui.QMessageBox.Ok)
             self.ui.leTitel.setFocus()
             return
+        
         if len(self.ui.leOrt.text()) <= 0:
             QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte einen Ort angeben!", QtGui.QMessageBox.Ok)
             self.ui.leOrt.setFocus()
             return
         
-        ''' ... '''
-        
         if len(self.ui.pteBeschreibung.toPlainText()) <= 0:
             QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte eine Beschreibung angeben!", QtGui.QMessageBox.Ok)
             self.ui.pteBeschreibung.setFocus()
             return
+        
+        self.newFromHour = self.ui.teBeginn.time().hour()
+        self.newFromMinute = self.ui.teBeginn.time().minute()
+        self.newUntilHour = self.ui.teEnde.time().hour()
+        self.newUntilMinute = self.ui.teEnde.time().minute()
+        ''' def __init__(self, from_hour, from_minute, until_hour, until_minute, weekdays): '''
+        self.newQueryTime = QueryTime(self.newFromHour, self.newFromMinute, self.newUntilHour, self.newUntilMinute)
+        
+        ''' Todo: EXCEPTION ABFANGEN?! '''
+        ''' Todo: Weekdays ?! '''
+        
+        self.newTitle = self.ui.leTitel.text()
+        self.newPlace = self.ui.leOrt.text()
+        self.newDescription = self.ui.pteBeschreibung.toPlainText()
+        ''' def __init__(self, title, place, query_time, description, id_=None): '''
+        self.newQuery = Query(self.newTitle, self.newPlace, self.newQueryTime, self.newDescription)
+        
+        ''' Todo: Query an Brain schicken '''
+        createNewQueryEntry(self.newQuery)
+        
+        ''' Todo: Brain muss nun ein Refresh an GUI schicken '''
         
         self.close()
