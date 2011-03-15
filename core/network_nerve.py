@@ -58,23 +58,18 @@ def signal_filter(signal_processor):
     Transmits errors back to the sender. Passes signals to synapse's
     signal_processor.
     """
-    try:
-        while True:
-            synapse, data = (yield)
-            try:
-                logs.logger.debug("filters data from %s" % synapse)
-                signal = Signal.deserialize(data)
-            except ProtocolError, reason:
-                # low-level protocol error (e.g transmission of '[1,2' )
-                logs.logger.debug("filter error: %s,%s" % (synapse, reason))
-                err_response = Signal('error',
-                                      (Signal.ProtocolError, str(reason)))
-                synapse.transmit((synapse, err_response))
-                synapse.disconnect()
-            else:
-                signal_processor.send((synapse, signal))
-    finally:
-        logs.logger.debug("signal filter closed")
+    while True:
+        synapse, data = (yield)
+        try:
+            signal = Signal.deserialize(data)
+        except ProtocolError, reason:
+            # low-level protocol error (e.g transmission of '[1,2' )
+            logs.logger.debug("filter error: %s,%s" % (synapse, reason))
+            err_response = Signal('error', (Signal.ProtocolError, str(reason)))
+            synapse.transmit(err_response)
+            synapse.disconnect()
+        else:
+            signal_processor.send((synapse, signal))
 
 
 class _Synapse(asynchat.async_chat):  # pylint: disable=R0904, W0223
@@ -82,16 +77,20 @@ class _Synapse(asynchat.async_chat):  # pylint: disable=R0904, W0223
 
     def __init__(self, sock, organ_id, sig_filter, sig_target=None):
         asynchat.async_chat.__init__(self, sock)
-        if sock is None:
-            self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.connect(organ_id)
-
+        self.active = True
         self.organ_id = organ_id
-        self.set_terminator(Signal.TERMINATOR)
         self.signal_filter = sig_filter
         self.signal_target = sig_target
+        if sock is None:
+            self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                self.connect(organ_id)
+            except TypeError:
+                self.active = False
+                self.close()
+
+        self.set_terminator(Signal.TERMINATOR)
         self.buffer = []
-        self.active = True
         self.collect_incoming_data = self.buffer.append
 
     def found_terminator(self):
@@ -101,13 +100,12 @@ class _Synapse(asynchat.async_chat):  # pylint: disable=R0904, W0223
 
     def is_active(self):
         """ provides information about synapse activity """
-        return (self.active == True)
+        return self.active
 
     def transmit(self, signal):
         """ transmits data back """
         if self.is_active():
             self.push(signal.serialize())
-            logs.logger.debug("transmitter: %s, %s" % (self, signal))
 
     def handle_close(self):
         """ closed or failed connections """
@@ -123,8 +121,8 @@ class _Synapse(asynchat.async_chat):  # pylint: disable=R0904, W0223
         """ A nice string representation for logging module """
         target = self.signal_target
         if target is None:
-            target = self.signal_filter
-        return "Synapse(%s <-> %s)" % (self.organ_id, target.__name__)
+            target = self.signal_filter.__name__
+        return "Synapse(%s <-> %s)" % (self.organ_id, target)
 
     def log(self, message):
         """ Overrides 'log' from asyncore module to produce consistent logs """
@@ -177,6 +175,7 @@ class NetworkNeuron(asyncore.dispatcher):  # pylint: disable=R0904
         logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
 
     def connect(self, organ_id, target=None):  # pylint: disable=W0221
+        """ Connects a (free) synapse to an organ """
         return _Synapse(None, organ_id, self.signal_filter, target)
 
     def handle_expt(self):
