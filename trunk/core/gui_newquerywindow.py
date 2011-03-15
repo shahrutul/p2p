@@ -1,11 +1,5 @@
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'gui_ui_newquerywindow.ui'
-#
-# Created: Tue Mar 15 15:37:35 2011
-#      by: PySide uic UI code generator
-#
-# WARNING! All changes made in this file will be lost!
 
 from PySide import QtCore, QtGui
 
@@ -124,14 +118,14 @@ class MyNewQueryWindow(QtGui.QDialog):
         self.ui = Ui_NewQueryWindow()
         self.ui.setupUi(self)
         
-        QtCore.QObject.connect(self.ui.pbAbbrechen, QtCore.SIGNAL('clicked()'), self.pbAbbrechenClick)
-        QtCore.QObject.connect(self.ui.pbSpeichern, QtCore.SIGNAL('clicked()'), self.pbSpeichernClick)
+        QtCore.QObject.connect(self.ui.pbAbbrechen, QtCore.SIGNAL('clicked()'), self.pbAbbrechenClicked)
+        QtCore.QObject.connect(self.ui.pbSpeichern, QtCore.SIGNAL('clicked()'), self.pbSpeichernClicked)
         
-    def pbAbbrechenClick(self):
+    def pbAbbrechenClicked(self):
         self.close()
         
         
-    def pbSpeichernClick(self):
+    def pbSpeichernClicked(self):
         if len(self.ui.leTitel.text()) <= 0:
             QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte einen Titel angeben!", QtGui.QMessageBox.Ok)
             self.ui.leTitel.setFocus()

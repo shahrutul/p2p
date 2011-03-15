@@ -7,6 +7,7 @@
 from brain import Brain
 
 from gui_newquerywindow import MyNewQueryWindow
+from gui_detailswindow import MyDetailsWindow
 
 from PySide import QtCore, QtGui
 from time import localtime, strftime
@@ -72,14 +73,14 @@ class Ui_MainWindow(object):
         
         
 class MyMainWindow(QtGui.QMainWindow):    
-    def pbNeuClick(self):
+    def pbNeuClicked(self):
         self.myNewQueryWindow = MyNewQueryWindow()
         self.myNewQueryWindow.show()
                 
         '''self.addDummySearch()'''
     
     
-    def pbBearbeitenClick(self):
+    def pbBearbeitenClicked(self):
         self.log("Bearbeiten wurde angeklickt!")
         item = self.ui.twSuche.currentItem()
         if not item:
@@ -89,8 +90,10 @@ class MyMainWindow(QtGui.QMainWindow):
         print index
     
         
-    def pbEntfernen(self):
+    def pbEntfernenClicked(self):
         self.log("Entfernen wurde angeklickt!")
+        self.myDetailsWindow = MyDetailsWindow()
+        self.myDetailsWindow.show()
     
     
     def twSucheItemClicked(self, item = None, columnIndex = None): 
@@ -132,9 +135,9 @@ class MyMainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         
         ' Signals '
-        QtCore.QObject.connect(self.ui.pbNeu, QtCore.SIGNAL('clicked()'), self.pbNeuClick)
-        QtCore.QObject.connect(self.ui.pbBearbeiten, QtCore.SIGNAL('clicked()'), self.pbBearbeitenClick)
-        QtCore.QObject.connect(self.ui.pbEntfernen, QtCore.SIGNAL('clicked()'), self.pbEntfernen)
+        QtCore.QObject.connect(self.ui.pbNeu, QtCore.SIGNAL('clicked()'), self.pbNeuClicked)
+        QtCore.QObject.connect(self.ui.pbBearbeiten, QtCore.SIGNAL('clicked()'), self.pbBearbeitenClicked)
+        QtCore.QObject.connect(self.ui.pbEntfernen, QtCore.SIGNAL('clicked()'), self.pbEntfernenClicked)
         QtCore.QObject.connect(self.ui.twSuche, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), self.twSucheItemClicked)
         QtCore.QObject.connect(self.ui.twDetails, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.twDetailsItemDoubleClicked)
 
