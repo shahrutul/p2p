@@ -124,3 +124,28 @@ class MyNewQueryWindow(QtGui.QDialog):
         self.ui = Ui_NewQueryWindow()
         self.ui.setupUi(self)
         
+        QtCore.QObject.connect(self.ui.pbAbbrechen, QtCore.SIGNAL('clicked()'), self.pbAbbrechenClick)
+        QtCore.QObject.connect(self.ui.pbSpeichern, QtCore.SIGNAL('clicked()'), self.pbSpeichernClick)
+        
+    def pbAbbrechenClick(self):
+        self.close()
+        
+        
+    def pbSpeichernClick(self):
+        if len(self.ui.leTitel.text()) <= 0:
+            QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte einen Titel angeben!", QtGui.QMessageBox.Ok)
+            self.ui.leTitel.setFocus()
+            return
+        if len(self.ui.leOrt.text()) <= 0:
+            QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte einen Ort angeben!", QtGui.QMessageBox.Ok)
+            self.ui.leOrt.setFocus()
+            return
+        
+        ''' ... '''
+        
+        if len(self.ui.pteBeschreibung.toPlainText()) <= 0:
+            QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte eine Beschreibung angeben!", QtGui.QMessageBox.Ok)
+            self.ui.pteBeschreibung.setFocus()
+            return
+        
+        self.close()

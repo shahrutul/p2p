@@ -27,8 +27,7 @@ class Ui_MainWindow(object):
         self.twSuche.setObjectName("twSuche")
         self.verticalLayout.addWidget(self.twSuche)
         self.buttonFrame = QtGui.QFrame(self.centralwidget)
-        self.buttonFrame.setFrameShape(QtGui.QFrame.StyledPanel)
-        self.buttonFrame.setFrameShadow(QtGui.QFrame.Raised)
+        self.buttonFrame.setFrameShape(QtGui.QFrame.NoFrame)
         self.buttonFrame.setObjectName("buttonFrame")
         self.gridLayout = QtGui.QGridLayout(self.buttonFrame)
         self.gridLayout.setObjectName("gridLayout")
@@ -72,10 +71,8 @@ class Ui_MainWindow(object):
         self.twLog.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Log", None, QtGui.QApplication.UnicodeUTF8))
         
         
-        
 class MyMainWindow(QtGui.QMainWindow):    
     def pbNeuClick(self):
-        self.log("Neu wurde angeklickt!")
         self.myNewQueryWindow = MyNewQueryWindow()
         self.myNewQueryWindow.show()
                 
@@ -139,7 +136,6 @@ class MyMainWindow(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.pbBearbeiten, QtCore.SIGNAL('clicked()'), self.pbBearbeitenClick)
         QtCore.QObject.connect(self.ui.pbEntfernen, QtCore.SIGNAL('clicked()'), self.pbEntfernen)
         QtCore.QObject.connect(self.ui.twSuche, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), self.twSucheItemClicked)
-        '''QtCore.QObject.connect(self.ui.twSuche, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.twSucheItemDoubleClicked)'''
         QtCore.QObject.connect(self.ui.twDetails, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.twDetailsItemDoubleClicked)
 
 
@@ -152,7 +148,7 @@ if __name__ == "__main__":
     brainTimer = QtCore.QTimer()
     QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
     brainTimer.start(1)
-    '''
+    '''    
     myMainWindow.show()    
     sys.exit(app.exec_())
     
