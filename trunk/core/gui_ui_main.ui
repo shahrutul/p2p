@@ -44,10 +44,7 @@
     <item>
      <widget class="QFrame" name="buttonFrame">
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
