@@ -5,6 +5,9 @@
 # The main class for the GUI.
 
 from brain import Brain
+
+from gui_newquerywindow import MyNewQueryWindow
+
 from PySide import QtCore, QtGui
 from time import localtime, strftime
 import sys
@@ -73,7 +76,10 @@ class Ui_MainWindow(object):
 class MyMainWindow(QtGui.QMainWindow):    
     def pbNeuClick(self):
         self.log("Neu wurde angeklickt!")
-        self.addDummySearch()
+        self.myNewQueryWindow = MyNewQueryWindow()
+        self.myNewQueryWindow.show()
+                
+        '''self.addDummySearch()'''
     
     
     def pbBearbeitenClick(self):
@@ -94,14 +100,6 @@ class MyMainWindow(QtGui.QMainWindow):
         self.log("Suchefeld angeklickt.")
         if columnIndex != None:
             pass
-    
-            
-    '''
-    def twSucheItemDoubleClicked(self, item = None, columnIndex = None):
-        self.log("Suchefeld doppelt angeklickt.")
-        if columnIndex != None:
-            self.pbBearbeitenClick()
-    '''
     
     
     def twDetailsItemDoubleClicked(self, item = None, columnIndex = None):
@@ -148,14 +146,14 @@ class MyMainWindow(QtGui.QMainWindow):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myMainWindow = MyMainWindow()
-    
+    '''
     myMainWindow.brain = Brain()
     
     brainTimer = QtCore.QTimer()
     QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
     brainTimer.start(1)
-    
-    myMainWindow.show()
+    '''
+    myMainWindow.show()    
     sys.exit(app.exec_())
     
 '''
