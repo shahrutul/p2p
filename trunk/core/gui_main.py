@@ -4,6 +4,7 @@
 #
 # The main class for the GUI.
 
+from "../core/brain" import Brain
 from PySide import QtCore, QtGui
 from time import localtime, strftime
 import sys
