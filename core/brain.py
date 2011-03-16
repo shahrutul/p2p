@@ -318,10 +318,12 @@ class Brain(UIMessages):
     def registerUI(self, ui):
         self.ui = ui
 
+
     def createNewQueryEntry(self, entry):
         if not isinstance(entry, Query):
             raise ValueError("not a query!")
         self.user_queries[uuid.uuid1()] = entry
+        self.ui.reloadQueryEntries()
 
     def getAllQueryEntries(self):
         return self.user_queries.copy()
