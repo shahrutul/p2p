@@ -46,7 +46,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Abbrechen</string>
+    <string>&amp;Abbrechen</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pbSpeichern">
@@ -59,7 +59,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>Speichern</string>
+    <string>&amp;Speichern</string>
+   </property>
+   <property name="default">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QCheckBox" name="cbSo">
