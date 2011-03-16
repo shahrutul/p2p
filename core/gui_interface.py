@@ -16,6 +16,9 @@ class QueryTime(object):
         datetime.time(from_hour, from_minute)
         datetime.time(until_hour, until_minute)
         # check weekdays
+        if len(weekdays) == 0:
+            raise ValueError("weekday must be in 0..6 or %r, not empty!" %
+                             (QueryTime.WEEKDAYS))
         self.weekdays = []
         for day in weekdays:
             if day in QueryTime.WEEKDAYS:
@@ -41,65 +44,56 @@ class Query(object):
         self.description = str(description)
         self.id = id_
 
+class UIMessages(object):
+    ''' ###### 1 ######'''
+    ''' GUI --> brain '''
+    def createNewQueryEntry(newSearchEntry):
+        raise NotImplementedError
+    
+    ''' GUI --> brain '''
+    def getAllQueryEntries():
+        raise NotImplementedError
 
-''' ###### 1 ######'''
-''' GUI --> brain '''
-def createNewQueryEntry(newSearchEntry):
-    pass
+    ''' ###### 2 ###### '''
+    ''' GUI --> brain '''
+    def getQueryEntryById(id):
+        raise NotImplementedError
 
-''' brain --> GUI '''
-def reloadQueryEntries():
-    pass
+    ''' GUI --> brain '''
+    def setQueryEntryById(id, data):
+        raise NotImplementedError
+    
+    ''' ###### 4 ###### '''
+    ''' GUI --> brain '''
+    def getDetailResult(queryId, resultId):
+        raise NotImplementedError
 
-''' GUI --> brain '''
-def getAllQueryEntries():
-    pass
+    ''' ###### 5 ###### '''
+    ''' GUI --> brain '''
+    def sendChatMsg(msg, receiver):
+        raise NotImplementedError
+    
+    ''' ###### 2.1 ###### '''
+    ''' GUI --> brain '''
+    def deleteQueryEntryById(id):
+        raise NotImplementedError
 
-''' HINWEIS: reloadSearchEntries oder getAllSearchEntries eventuell überflüssig '''
+    ''' HINWEIS: reloadSearchEntries oder getAllSearchEntries eventuell überflüssig '''
 
+class BrainMessages(object):    
+    ''' brain --> GUI '''
+    def reloadQueryEntries():
+        raise NotImplementedError
 
+    ''' ###### 3 ###### '''
+    ''' brain --> GUI '''
+    def reloadResultsForQueryId(id):
+        raise NotImplementedError
 
-''' ###### 2 ###### '''
-''' GUI --> brain '''
-def getQueryEntryById(id):
-    pass
-
-''' GUI --> brain '''
-def setQueryEntryById(id, data):
-    pass
-
-''' ###### 2.1 ###### '''
-''' GUI --> brain '''
-def deleteQueryEntryById(id):
-    pass
-
-
-
-''' ###### 3 ###### '''
-''' brain --> GUI '''
-def reloadResultsForQueryId(id):
-    pass
-
-
-
-''' ###### 4 ###### '''
-''' GUI --> brain '''
-def getDetailResult(queryId, resultId):
-    pass
-
-
-
-''' ###### 5 ###### '''
-''' GUI --> brain '''
-def sendChatMsg(msg, receiver):
-    pass
-
-
-
-''' ###### 6 ###### '''
-''' brain --> GUI '''
-def pickupChatMsg():
-    pass
+    ''' ###### 6 ###### '''
+    ''' brain --> GUI '''
+    def pickupChatMsg():
+        raise NotImplementedError
 
 
 # obsolete! import logging in GUI and register your log-outputter:
