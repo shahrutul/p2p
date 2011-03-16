@@ -17,6 +17,7 @@ import time
 import random
 import uuid
 
+import gui_interface
 from decorators import coroutine, singleton
 from network_nerve import NetworkNeuron
 from signal_protocol import Signal, ProtocolError
@@ -330,6 +331,13 @@ class Brain(object):
         self.network_interaction = network_interaction(self)
 
         self.errors_to_ui = errors_to_ui()
+
+        import logging
+        class GUILogger(logging.Handler):
+            def emit(self, record):
+                msg = self.format(record)
+                gui_interface.logMessage(msg)
+        logs.logger.addHandler(GUILogger())
 
     def suspend(self):
         """ Closes all connections, cleans up and 'suspends'. """
