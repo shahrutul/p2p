@@ -514,4 +514,4 @@ class Brain(UIMessages):
         else:
             # hm, we have a problem!
             #self.errors_to_ui.send("No known neighbours!")
-            self.notify_ui.send('error', "No known neighbours!")
+            self.notify_ui.send(('error', "No known neighbours!"))
