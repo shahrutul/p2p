@@ -327,7 +327,7 @@ class Brain(UIMessages):
         query.id = id_
         self.user_queries[query.id] = query
         self.queries_to_send.add(query)
-        logs.logger.debug("new %s query created: %s" % (query.id, query)
+        logs.logger.debug("new %s query created: %s" % (query.id, query))
         self.ui.reloadQueryEntries(self.user_queries.copy())
 
     def getAllQueryEntries(self):
