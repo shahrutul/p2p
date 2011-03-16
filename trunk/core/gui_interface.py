@@ -76,7 +76,7 @@ class Query(object):
         return self.query_time.compare(obj.query_time)
 
     def __str__(self):
-        return unicode("Title:%s, place:%s " %
+        return unicode("Title: %s, place: %s" %
                        (self.title[:15], self.place[:15]))
 
     def __repr__(self):
@@ -132,20 +132,3 @@ class BrainMessages(object):
     def pickupChatMsg():
         raise NotImplementedError
 
-
-# obsolete! import logging in GUI and register your log-outputter:
-"""
- import logging
- 
-    class GUILogger(logging.Handler):
-        def emit(self, record):
-            msg = self.format(record)
-            myMainWindow.logMessage(msg)
-            
-    logging.getLogger().addHandler(GUILogger())
-"""
-    
-''' ###### 7 ###### '''
-''' brain --> GUI '''
-def logMessage(msg):   
-    myMainWindow.log(msg)
