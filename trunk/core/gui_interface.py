@@ -46,20 +46,20 @@ class Query(object):
 
 class UIMessages(object):
 
-    def registerUI(self, ui):
+    def registerUI(ui):
         raise NotImplementedError
     ''' ###### 1 ######'''
     ''' GUI --> brain '''
-    def createNewQueryEntry(self, newSearchEntry):
+    def createNewQueryEntry(newSearchEntry):
         raise NotImplementedError
     
     ''' GUI --> brain '''
-    def getAllQueryEntries(self):
+    def getAllQueryEntries():
         raise NotImplementedError
 
     ''' ###### 2 ###### '''
     ''' GUI --> brain '''
-    def getQueryEntryById(self, id):
+    def getQueryEntryById(id):
         raise NotImplementedError
 
     ''' GUI --> brain '''
@@ -68,12 +68,12 @@ class UIMessages(object):
     
     ''' ###### 4 ###### '''
     ''' GUI --> brain '''
-    def getDetailResult(self, queryId, resultId):
+    def getDetailResult(queryId, resultId):
         raise NotImplementedError
 
     ''' ###### 5 ###### '''
     ''' GUI --> brain '''
-    def sendChatMsg(self, msg, receiver):
+    def sendChatMsg(msg, receiver):
         raise NotImplementedError
     
     ''' ###### 2.1 ###### '''
@@ -85,17 +85,17 @@ class UIMessages(object):
 
 class BrainMessages(object):    
     ''' brain --> GUI '''
-    def reloadQueryEntries(self):
+    def reloadQueryEntries():
         raise NotImplementedError
 
     ''' ###### 3 ###### '''
     ''' brain --> GUI '''
-    def reloadResultsForQueryId(self, id):
+    def reloadResultsForQueryId(id):
         raise NotImplementedError
 
     ''' ###### 6 ###### '''
     ''' brain --> GUI '''
-    def pickupChatMsg(self):
+    def pickupChatMsg():
         raise NotImplementedError
 
 
