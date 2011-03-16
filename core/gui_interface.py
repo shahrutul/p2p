@@ -102,7 +102,19 @@ def pickupChatMsg():
     pass
 
 
+# obsolete! import logging in GUI and register your log-outputter:
+"""
+ import logging
+ 
+    class GUILogger(logging.Handler):
+        def emit(self, record):
+            msg = self.format(record)
+            myMainWindow.logMessage(msg)
+            
+    logging.getLogger().addHandler(GUILogger())
+"""
+    
 ''' ###### 7 ###### '''
 ''' brain --> GUI '''
-def logMessage(msg):
+def logMessage(msg):   
     myMainWindow.log(msg)
