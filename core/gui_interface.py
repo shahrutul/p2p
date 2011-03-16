@@ -34,6 +34,26 @@ class QueryTime(object):
         self.until_hour = until_hour
         self.until_minute = until_minute
         self.weekdays = list(set(self.weekdays))
+
+    def compare(self, obj):
+        """ Compares QueryTimes and returns a True on correlations """
+        # check for weekdays intersection
+        if len(set(self.weekdays).intersection(obj.weekdays)) == 0:
+            return False
+        # hour intersection ?
+        if self.until_hour < obj.from_hour:
+            return False
+        elif self.until_hour == obj.from_hour:
+            if self.until_minute <= obj.from_minute:
+                return False
+        if obj.until_hour < self.from_hour:
+            return False
+        elif obj.until_hour == self.from_hour:
+            if obj.until_minute <= self.from_minute:
+                return False
+
+        return True
+
         
 class Query(object):
     """ Query data struct for gui communications"""
@@ -43,6 +63,18 @@ class Query(object):
         self.query_time = query_time
         self.description = str(description)
         self.id = id_
+        
+    def compare(self, obj):
+        my_title = [keyword.strip() for keyword in self.title.split(',')]
+        other_title = [keyword.strip() for keyword in obj.title.split(',')]
+        if len(set(my_title).intersection(other_title)) == 0:
+            return False
+        my_places = [keyword.strip() for keyword in self.place.split(',')]
+        other_places = [keyword.strip() for keyword in obj.place.split(',')]
+        if len(set(my_places).intersection(other_places)) == 0:
+            return False
+        return self.query_time.compare(obj.query_time)
+        
 
 class UIMessages(object):
 
