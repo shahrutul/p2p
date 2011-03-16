@@ -257,7 +257,6 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
 
 
 class GUILogger(logging.Handler):
-    
     def __init__(self, myMainWindow_):
         logging.Handler.__init__(self)
         self.myMainWindow = myMainWindow_
@@ -294,7 +293,7 @@ if __name__ == "__main__":
     
     brainTimer = QtCore.QTimer()
     QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
-    brainTimer.start(1)
+    brainTimer.start(100)
     
     myMainWindow.show()    
     sys.exit(app.exec_())
