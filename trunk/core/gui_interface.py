@@ -54,6 +54,8 @@ class QueryTime(object):
 
         return True
 
+
+
         
 class Query(object):
     """ Query data struct for gui communications"""
@@ -74,6 +76,9 @@ class Query(object):
         if len(set(my_places).intersection(other_places)) == 0:
             return False
         return self.query_time.compare(obj.query_time)
+
+    def __str__(self):
+        return "Title:%s, place:%s " % (self.title[:10], self.place[:10])
         
 
 class UIMessages(object):
