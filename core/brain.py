@@ -345,8 +345,9 @@ class Brain(UIMessages):
     def sendChatMsg(self, msg, receiver):
         raise NotImplementedError
 
-    def deleteQueryEntryById(self, id):
-        self.user_queries.pop(id, None)
+    def deleteQueryEntryById(self, id_):
+        self.user_queries.pop(id_, None)
+        logs.logger.debug("entry %s deleted" % id_)
         self.ui.reloadQueryEntries(self.user_queries.copy())
 
     def resume(self):
