@@ -134,7 +134,7 @@ class Signal(object):
               'youare': (basestring, int),
               'ping': (basestring, int, int),
               'pong': (basestring, int),
-              'query': (Query, int, int)
+              'query': (Query, basestring, int, int, int)
              }
 
     def __init__(self, type_, content=()):
