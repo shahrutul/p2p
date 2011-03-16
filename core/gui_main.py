@@ -94,10 +94,8 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
     def pbBearbeitenClicked(self):
         item = self.ui.twSuche.currentItem()
         if not item:
-            #self.log("Kein Item selektiert!")
             return
-        #index = self.ui.twSuche.indexOfTopLevelItem(item)
-        #print index
+
         self.myNewQueryWindow = MyNewQueryWindow(self)
         self.myNewQueryWindow.ui.leTitel.setText(item.myQuery.title)
         self.myNewQueryWindow.ui.leOrt.setText(item.myQuery.place)
@@ -134,13 +132,44 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         
     
     def twDetailsItemDoubleClicked(self, item = None, columnIndex = None):
-        self.log("Detailfeld doppelt angeklickt.")
-        if columnIndex != None:
-            pass
-        self.myDetailsWindow = MyDetailsWindow()
+        item = self.ui.twDetails.currentItem()
+        if not item:
+            return
+        
+        self.myDetailsWindow = MyDetailsWindow(self)
+        
         self.myDetailsWindow.ui.tabs.setCurrentIndex(0)
         ''' Todo: chat(1) wieder rausnehmen '''
         self.myDetailsWindow.ui.tabs.setTabText(1, "Chat (1)")
+        
+        self.myDetailsWindow.ui.leTitel.setText(item.myQuery.title)
+        self.myDetailsWindow.ui.leOrt.setText(item.myQuery.place)
+        self.myDetailsWindow.ui.teBeginn.setTime(QtCore.QTime(item.myQuery.query_time.from_hour, item.myQuery.query_time.from_minute,0,0))
+        self.myDetailsWindow.ui.teEnde.setTime(QtCore.QTime(item.myQuery.query_time.until_hour, item.myQuery.query_time.until_minute,0,0))
+        if QueryTime.WEEKDAYS[0] in item.myQuery.query_time.weekdays:
+            self.myDetailsWindow.ui.cbMo.setChecked(True)
+        if QueryTime.WEEKDAYS[1] in item.myQuery.query_time.weekdays:
+            self.myDetailsWindow.ui.cbDi.setChecked(True)
+        if QueryTime.WEEKDAYS[2] in item.myQuery.query_time.weekdays:
+            self.myDetailsWindow.ui.cbMi.setChecked(True)
+        if QueryTime.WEEKDAYS[3] in item.myQuery.query_time.weekdays:
+            self.myDetailsWindow.ui.cbDo.setChecked(True)
+        if QueryTime.WEEKDAYS[4] in item.myQuery.query_time.weekdays:
+            self.myDetailsWindow.ui.cbFr.setChecked(True)
+        if QueryTime.WEEKDAYS[5] in item.myQuery.query_time.weekdays:
+            self.myDetailsWindow.ui.cbSa.setChecked(True)
+        if QueryTime.WEEKDAYS[6] in item.myQuery.query_time.weekdays:
+            self.myDetailsWindow.ui.cbSo.setChecked(True)
+        
+
+        
+        # load description
+        self.myDetailsWindow.ui.pteBeschreibung.clear()
+        self.myDetailsWindow.ui.pteBeschreibung.insertPlainText(item.myQuery.description)
+        
+        # the window should know that the item is edited and must be deleted+added
+        self.myDetailsWindow.myIsEdited = True
+        self.myDetailsWindow.myUuidToDelete = item.myUuid
         self.myDetailsWindow.show()
 
     
@@ -261,11 +290,11 @@ if __name__ == "__main__":
     rNewQueryTime = QueryTime(5, 15, 7, 30, rList)
     rNewQuery = Query("Kaugummi", "HHU", rNewQueryTime, "dies ist eine Testbeschreibung")
     rDict = dict({'a49298d8-4fe9-11e0-a6cb-00166fc3d7af': rNewQuery})
-    myMainWindow.reloadResultEntries(rDict)
+    #myMainWindow.reloadResultEntries(rDict)
     
-    #brainTimer = QtCore.QTimer()
-    #QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
-    #brainTimer.start(1)
+    brainTimer = QtCore.QTimer()
+    QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
+    brainTimer.start(1)
     
     myMainWindow.show()    
     sys.exit(app.exec_())
