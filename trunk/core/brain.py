@@ -106,14 +106,30 @@ def ping_processor(brain):
             synapse.disconnect()
 
 @coroutine
-def query_processor(brain):
+def query_filter(brain):
+    """ filter query_hit and query requests """
+    while brain.active:
+        query, ip, port = (yield)
+        query.sender = (ip, port)
+        logs.logger.debug("a query %s from %s:%s" % (str(query), ip, port))
+        new_entries = False
+        for user_query in brain.user_queries.values():
+            if user_query.compare(query) or 1>0: # TODO: remove 1>0!
+                brain.query_results[query.id] = query
+                new_entries = True
+        if new_entries:
+            brain.notify_ui.send('new results')
+
+
+@coroutine
+def query_processor(brain, filter):
     """ process 'query' requests """
     while brain.active:
         try:
             synapse, signal = (yield)
             query, IP, port, ttl, hops = signal
 
-            if query.id in brain.query_cache:
+            if query.id in brain.query_cache and 1>2: # TODO: remove 1>2
                 logs.logger.debug("discard query request %s" % str(query))
                 synapse.disconnect()
                 continue
@@ -126,18 +142,27 @@ def query_processor(brain):
                 hops += 1
             else:
                 continue
+            # sends to filter
+            filter.send((query, IP, port))
             # compare and send a hit
             if brain.organ_id:
-                logs.logger.debug("TODO: compare and send a hit!")
+                for user_query in brain.user_queries.values():
+                    if user_query.compare(query):
+                        resp = Signal('query_hit',
+                                      (user_query, brain.organ_id[0],
+                                       brain.organ_id[1]))
+                        synapse.transmit(resp)
+                        logs.logger.debug("sends a query hit %s to %s" %
+                                          (str(user_query), str(synapse)))
             # send broadcast to neighbours
             if ttl > 0:
                 for neigh in brain.neighbours.keys():
                     #if neigh[0] == synapse.organ_id[0]:   # TODO: reenable it for "real world"
                     #    continue
                     neigh_synapse = brain.network_neuron.connect(neigh, synapse)
-                    logs.logger.debug("broadcast %s to %s" %(ping, str(neigh)))
+                    logs.logger.debug("broadcast %s to %s" %(query, str(neigh)))
                     neigh_synapse.transmit(Signal('query',
-                                                  (query,IP, port, ttl, hops)))
+                                                  (query, IP, port, ttl, hops)))
             else:
                 synapse.disconnect()
 
@@ -301,7 +326,9 @@ def network_cortex(brain):
     whoami_target = whoami_processor()
     ping_target = ping_processor(brain)
     candidate_target = candidates_processor(brain)
-    query_target = query_processor(brain)
+    query_res_filter = query_filter(brain)
+    query_target = query_processor(brain, query_res_filter)
+
     while brain.active:
         synapse, signal = (yield)
         try:
@@ -330,6 +357,9 @@ def network_cortex(brain):
                 logs.logger.debug("incoming query: %s", signal.content[0])
                 query_target.send((synapse, signal.content))
 
+            elif signal.type == 'query_hit':
+                query_res_filter.send(signal.content)
+
         except ProtocolError, reason:
             logs.logger.debug("network cortex error: %s,%s" %
                               (synapse, reason))
@@ -340,14 +370,14 @@ def network_cortex(brain):
 
 
 @coroutine
-def errors_to_ui():
-    """ sends errors to ui """
-    err = None
+def notify_ui(brain):
+    """ sends messages from coroutines to ui """
     while True:
-        last, err = err, (yield)
-        if last != err:
-            print err
-        # TODO: write some code
+        message = (yield)
+        if not brain.ui:
+            continue
+        if message == 'new results':
+            brain.ui.reloadResultEntries(brain.query_results.copy())   
 
 
 class Wait():
@@ -449,7 +479,7 @@ class Brain(UIMessages):
         self.network_cortex = network_cortex(self)
         self.network_neuron = NetworkNeuron(self.network_cortex)
         self.network_interaction = network_interaction(self)
-        self.errors_to_ui = errors_to_ui()
+        self.notify_ui = notify_ui(self)
 
         ##dummy data
         qt = QueryTime(1,0,2,0,['mo'])
@@ -483,4 +513,5 @@ class Brain(UIMessages):
                               str(self.neighbours.keys()))
         else:
             # hm, we have a problem!
-            self.errors_to_ui.send("No known neighbours!")
+            #self.errors_to_ui.send("No known neighbours!")
+            self.notify_ui.send('error', "No known neighbours!")
