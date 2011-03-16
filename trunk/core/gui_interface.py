@@ -60,10 +60,10 @@ class QueryTime(object):
 class Query(object):
     """ Query data struct for gui communications"""
     def __init__(self, title, place, query_time, description, id_=None):        
-        self.title = str(title)
-        self.place = str(place)
+        self.title = unicode(title)
+        self.place = unicode(place)
         self.query_time = query_time
-        self.description = str(description)
+        self.description = unicode(description)
         self.id = id_
         
     def compare(self, obj):
