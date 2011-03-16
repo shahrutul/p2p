@@ -4,6 +4,7 @@
 from PySide import QtCore, QtGui
 from time import localtime, strftime
 
+
 class Ui_DetailsWindow(object):
     def setupUi(self, DetailsWindow):
         DetailsWindow.setObjectName("DetailsWindow")
@@ -14,23 +15,23 @@ class Ui_DetailsWindow(object):
         self.tabDetails = QtGui.QWidget()
         self.tabDetails.setObjectName("tabDetails")
         self.cbSo = QtGui.QCheckBox(self.tabDetails)
+        self.cbSo.setEnabled(False)
         self.cbSo.setGeometry(QtCore.QRect(318, 170, 45, 22))
         self.cbSo.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.cbSo.setCheckable(False)
         self.cbSo.setObjectName("cbSo")
         self.cbMo = QtGui.QCheckBox(self.tabDetails)
+        self.cbMo.setEnabled(False)
         self.cbMo.setGeometry(QtCore.QRect(14, 170, 49, 22))
         self.cbMo.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.cbMo.setCheckable(False)
         self.cbMo.setObjectName("cbMo")
         self.leOrt = QtGui.QLineEdit(self.tabDetails)
         self.leOrt.setGeometry(QtCore.QRect(70, 40, 294, 27))
         self.leOrt.setReadOnly(True)
         self.leOrt.setObjectName("leOrt")
         self.cbMi = QtGui.QCheckBox(self.tabDetails)
+        self.cbMi.setEnabled(False)
         self.cbMi.setGeometry(QtCore.QRect(117, 170, 44, 22))
         self.cbMi.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.cbMi.setCheckable(False)
         self.cbMi.setObjectName("cbMi")
         self.teEnde = QtGui.QTimeEdit(self.tabDetails)
         self.teEnde.setGeometry(QtCore.QRect(70, 106, 294, 27))
@@ -41,9 +42,9 @@ class Ui_DetailsWindow(object):
         self.lbBeschreibung.setGeometry(QtCore.QRect(10, 220, 351, 17))
         self.lbBeschreibung.setObjectName("lbBeschreibung")
         self.cbDi = QtGui.QCheckBox(self.tabDetails)
+        self.cbDi.setEnabled(False)
         self.cbDi.setGeometry(QtCore.QRect(69, 170, 42, 22))
         self.cbDi.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.cbDi.setCheckable(False)
         self.cbDi.setObjectName("cbDi")
         self.pteBeschreibung = QtGui.QPlainTextEdit(self.tabDetails)
         self.pteBeschreibung.setGeometry(QtCore.QRect(10, 243, 351, 91))
@@ -53,9 +54,9 @@ class Ui_DetailsWindow(object):
         self.lbTitel.setGeometry(QtCore.QRect(15, 7, 49, 27))
         self.lbTitel.setObjectName("lbTitel")
         self.cbDo = QtGui.QCheckBox(self.tabDetails)
+        self.cbDo.setEnabled(False)
         self.cbDo.setGeometry(QtCore.QRect(167, 170, 47, 22))
         self.cbDo.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.cbDo.setCheckable(False)
         self.cbDo.setObjectName("cbDo")
         self.teBeginn = QtGui.QTimeEdit(self.tabDetails)
         self.teBeginn.setGeometry(QtCore.QRect(70, 73, 294, 27))
@@ -76,14 +77,15 @@ class Ui_DetailsWindow(object):
         self.leTitel.setReadOnly(True)
         self.leTitel.setObjectName("leTitel")
         self.cbFr = QtGui.QCheckBox(self.tabDetails)
+        self.cbFr.setEnabled(False)
         self.cbFr.setGeometry(QtCore.QRect(220, 170, 42, 22))
         self.cbFr.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.cbFr.setCheckable(False)
+        self.cbFr.setChecked(False)
         self.cbFr.setObjectName("cbFr")
         self.cbSa = QtGui.QCheckBox(self.tabDetails)
+        self.cbSa.setEnabled(False)
         self.cbSa.setGeometry(QtCore.QRect(268, 170, 44, 22))
         self.cbSa.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.cbSa.setCheckable(False)
         self.cbSa.setObjectName("cbSa")
         self.lbKalendertage = QtGui.QLabel(self.tabDetails)
         self.lbKalendertage.setGeometry(QtCore.QRect(10, 150, 351, 17))
@@ -142,6 +144,10 @@ class Ui_DetailsWindow(object):
         self.tabs.setTabText(self.tabs.indexOf(self.tabDetails), QtGui.QApplication.translate("DetailsWindow", "Details", None, QtGui.QApplication.UnicodeUTF8))
         self.pbSenden.setText(QtGui.QApplication.translate("DetailsWindow", "&Senden", None, QtGui.QApplication.UnicodeUTF8))
         self.tabs.setTabText(self.tabs.indexOf(self.tabChat), QtGui.QApplication.translate("DetailsWindow", "Chat", None, QtGui.QApplication.UnicodeUTF8))
+
+
+
+
 
 
 

@@ -30,6 +30,9 @@
      <string>Details</string>
     </attribute>
     <widget class="QCheckBox" name="cbSo">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>318</x>
@@ -44,11 +47,11 @@
      <property name="text">
       <string>So</string>
      </property>
-     <property name="checkable">
-      <bool>false</bool>
-     </property>
     </widget>
     <widget class="QCheckBox" name="cbMo">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>14</x>
@@ -62,9 +65,6 @@
      </property>
      <property name="text">
       <string>Mo</string>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
      </property>
     </widget>
     <widget class="QLineEdit" name="leOrt">
@@ -81,6 +81,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="cbMi">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>117</x>
@@ -94,9 +97,6 @@
      </property>
      <property name="text">
       <string>Mi</string>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
      </property>
     </widget>
     <widget class="QTimeEdit" name="teEnde">
@@ -133,6 +133,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="cbDi">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>69</x>
@@ -146,9 +149,6 @@
      </property>
      <property name="text">
       <string>Di</string>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
      </property>
     </widget>
     <widget class="QPlainTextEdit" name="pteBeschreibung">
@@ -178,6 +178,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="cbDo">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>167</x>
@@ -191,9 +194,6 @@
      </property>
      <property name="text">
       <string>Do</string>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
      </property>
     </widget>
     <widget class="QTimeEdit" name="teBeginn">
@@ -269,6 +269,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="cbFr">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>220</x>
@@ -283,11 +286,14 @@
      <property name="text">
       <string>Fr</string>
      </property>
-     <property name="checkable">
+     <property name="checked">
       <bool>false</bool>
      </property>
     </widget>
     <widget class="QCheckBox" name="cbSa">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>268</x>
@@ -301,9 +307,6 @@
      </property>
      <property name="text">
       <string>Sa</string>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
      </property>
     </widget>
     <widget class="QLabel" name="lbKalendertage">
