@@ -315,27 +315,27 @@ class Brain(UIMessages):
     def __init__(self, ui = None):
         self.resume()
 
-    def createNewQueryEntry(entry):
+    def createNewQueryEntry(self, entry):
         if not isinstance(entry, Query):
             raise ValueError("not a query!")
         self.user_queries[uuid.uuid1()] = entry
 
-    def getAllQueryEntries():
+    def getAllQueryEntries(self):
         return self.user_queries.copy()
 
-    def getQueryEntryById(id):
+    def getQueryEntryById(self,id):
         return self.user_queries.get(id)
 
-    def setQueryEntryById(id, data):
+    def setQueryEntryById(self,id, data):
         raise NotImplementedError
-    
-    def getDetailResult(queryId, resultId):
+
+    def getDetailResult(self, queryId, resultId):
         raise NotImplementedError
-    
-    def sendChatMsg(msg, receiver):
+
+    def sendChatMsg(self,msg, receiver):
         raise NotImplementedError
-    
-    def deleteQueryEntryById(id):
+
+    def deleteQueryEntryById(self, id):
         self.user_queries.pop(id, None)
 
     def resume(self):
