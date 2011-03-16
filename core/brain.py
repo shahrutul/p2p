@@ -323,7 +323,7 @@ class Brain(UIMessages):
         if not isinstance(entry, Query):
             raise ValueError("not a query!")
         self.user_queries[uuid.uuid1()] = entry
-        self.ui.reloadQueryEntries()
+        self.ui.reloadQueryEntries(self.user_queries.copy())
 
     def getAllQueryEntries(self):
         return self.user_queries.copy()
