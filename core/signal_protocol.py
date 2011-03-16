@@ -43,7 +43,7 @@ youare(IP, port)
 # args: string, number
 
 # query hit: reply to a query
-query_hit(reply_query_data)
+query_hit(reply_query_data, IP, port)
 # args: string, number, object
 # returns: nothing
 
@@ -134,7 +134,8 @@ class Signal(object):
               'youare': (basestring, int),
               'ping': (basestring, int, int),
               'pong': (basestring, int),
-              'query': (Query, basestring, int, int, int)
+              'query': (Query, basestring, int, int, int),
+              'query_hit':(Query, basestring, int)
              }
 
     def __init__(self, type_, content=()):
