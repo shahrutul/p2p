@@ -128,12 +128,7 @@ class MyNewQueryWindow(QtGui.QDialog):
         
         
     def pbSpeichernClicked(self):
-        
-        if self.myIsEdited:
-            # delete old query-entry
-            self.parent().brain.deleteQueryEntryById(self.myUuidToDelete)
-        
-        # ... and create a new query-entry        
+               
         if len(self.ui.leTitel.text()) <= 0:
             QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte einen Titel angeben!", QtGui.QMessageBox.Ok)
             self.ui.leTitel.setFocus()
@@ -178,13 +173,15 @@ class MyNewQueryWindow(QtGui.QDialog):
             QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte mindestens einen Kalendertag angeben!", QtGui.QMessageBox.Ok)
             return
         
+        if self.myIsEdited:
+            # delete old query-entry
+            self.parent().brain.deleteQueryEntryById(self.myUuidToDelete)
+        
         self.newTitle = self.ui.leTitel.text()
         self.newPlace = self.ui.leOrt.text()
         self.newDescription = self.ui.pteBeschreibung.toPlainText()
         ''' def __init__(self, title, place, query_time, description, id_=None): '''
         self.newQuery = Query(self.newTitle, self.newPlace, self.newQueryTime, self.newDescription)
-        
-        
         
         ''' Todo: Query an Brain schicken '''
         self.parent().brain.createNewQueryEntry(self.newQuery)

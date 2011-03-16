@@ -86,6 +86,7 @@ class Ui_MainWindow(object):
 class MyMainWindow(QtGui.QMainWindow, BrainMessages):    
     def pbNeuClicked(self):
         self.myNewQueryWindow = MyNewQueryWindow(self)
+        self.myNewQueryWindow.setModal(True)
         self.myNewQueryWindow.myIsEdited = False
         self.myNewQueryWindow.show()
     
@@ -120,6 +121,7 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         self.myNewQueryWindow.ui.pteBeschreibung.insertPlainText(item.myQuery.description)
         self.myNewQueryWindow.myIsEdited = True
         self.myNewQueryWindow.myUuidToDelete = item.myUuid
+        self.myNewQueryWindow.setModal(True)
         self.myNewQueryWindow.show()
     
         
@@ -167,12 +169,25 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
                 self.untilMinute = "0" + self.untilMinute
             newItem.setText(1, self.fromHour + ":" + self.fromMinute +
                              "-" + self.untilHour + ":" + self.untilMinute)
-            #newItem.setText(2, query.query_time.weekdays)
+            self.newWeekdays = ""
+            if query.query_time.WEEKDAYS[0] in query.query_time.weekdays:
+                self.newWeekdays = self.newWeekdays + "Mo "
+            if query.query_time.WEEKDAYS[1] in query.query_time.weekdays:
+                self.newWeekdays = self.newWeekdays + "Di "
+            if query.query_time.WEEKDAYS[2] in query.query_time.weekdays:
+                self.newWeekdays = self.newWeekdays + "Mi "
+            if query.query_time.WEEKDAYS[3] in query.query_time.weekdays:
+                self.newWeekdays = self.newWeekdays + "Do "
+            if query.query_time.WEEKDAYS[4] in query.query_time.weekdays:
+                self.newWeekdays = self.newWeekdays + "Fr "
+            if query.query_time.WEEKDAYS[5] in query.query_time.weekdays:
+                self.newWeekdays = self.newWeekdays + "Sa "
+            if query.query_time.WEEKDAYS[6] in query.query_time.weekdays:
+                self.newWeekdays = self.newWeekdays + "So "
+            newItem.setText(2, self.newWeekdays)
             newItem.setText(3, query.place)
             
             self.newDescriptionWithoutReturns = unicode(str(query.description).replace("\n", " "))
-            
-            #exifUI.setWindowTitle(QtGui.QApplication.translate("exifUI", "Form", None, QtGui.QApplication.UnicodeUTF8))
             newItem.setText(4, self.newDescriptionWithoutReturns)
             newItem.myUuid = key
             newItem.myQuery = query
@@ -223,6 +238,13 @@ if __name__ == "__main__":
 
     myMainWindow.brain = Brain()
     myMainWindow.brain.registerUI(myMainWindow)
+    
+    ''' TESTEINTRAG '''
+    list = []
+    list.append(QueryTime.WEEKDAYS[2])
+    newQueryTime = QueryTime(9, 11, 23, 42, list)
+    newQuery = Query("Test", "Testort", newQueryTime, "Testbeschreibung")
+    myMainWindow.brain.createNewQueryEntry(newQuery)
     
     #brainTimer = QtCore.QTimer()
     #QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
