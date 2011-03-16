@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>568</width>
+    <width>642</width>
     <height>539</height>
    </rect>
   </property>
@@ -27,6 +27,16 @@
       <column>
        <property name="text">
         <string>Titel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Zeit</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kalendertage</string>
        </property>
       </column>
       <column>
@@ -83,6 +93,16 @@
       <column>
        <property name="text">
         <string>Titel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Zeit</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kalendertage</string>
        </property>
       </column>
       <column>

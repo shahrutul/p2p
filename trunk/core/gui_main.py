@@ -15,10 +15,13 @@ from time import localtime, strftime
 import sys
 import logging
 
+
+from PySide import QtCore, QtGui
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(568, 539)
+        MainWindow.resize(642, 539)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
@@ -62,16 +65,22 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Peer2Peer 2011", None, QtGui.QApplication.UnicodeUTF8))
         self.lbSuche.setText(QtGui.QApplication.translate("MainWindow", "Suche:", None, QtGui.QApplication.UnicodeUTF8))
         self.twSuche.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Titel", None, QtGui.QApplication.UnicodeUTF8))
-        self.twSuche.headerItem().setText(1, QtGui.QApplication.translate("MainWindow", "Ort", None, QtGui.QApplication.UnicodeUTF8))
-        self.twSuche.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Beschreibung", None, QtGui.QApplication.UnicodeUTF8))
+        self.twSuche.headerItem().setText(1, QtGui.QApplication.translate("MainWindow", "Zeit", None, QtGui.QApplication.UnicodeUTF8))
+        self.twSuche.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Kalendertage", None, QtGui.QApplication.UnicodeUTF8))
+        self.twSuche.headerItem().setText(3, QtGui.QApplication.translate("MainWindow", "Ort", None, QtGui.QApplication.UnicodeUTF8))
+        self.twSuche.headerItem().setText(4, QtGui.QApplication.translate("MainWindow", "Beschreibung", None, QtGui.QApplication.UnicodeUTF8))
         self.pbNeu.setText(QtGui.QApplication.translate("MainWindow", "&Neu", None, QtGui.QApplication.UnicodeUTF8))
         self.pbBearbeiten.setText(QtGui.QApplication.translate("MainWindow", "&Bearbeiten", None, QtGui.QApplication.UnicodeUTF8))
         self.pbEntfernen.setText(QtGui.QApplication.translate("MainWindow", "&Entfernen", None, QtGui.QApplication.UnicodeUTF8))
         self.lbErgebnisse.setText(QtGui.QApplication.translate("MainWindow", "Ergebnisse:", None, QtGui.QApplication.UnicodeUTF8))
         self.twDetails.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Titel", None, QtGui.QApplication.UnicodeUTF8))
-        self.twDetails.headerItem().setText(1, QtGui.QApplication.translate("MainWindow", "Ort", None, QtGui.QApplication.UnicodeUTF8))
-        self.twDetails.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Beschreibung", None, QtGui.QApplication.UnicodeUTF8))
+        self.twDetails.headerItem().setText(1, QtGui.QApplication.translate("MainWindow", "Zeit", None, QtGui.QApplication.UnicodeUTF8))
+        self.twDetails.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Kalendertage", None, QtGui.QApplication.UnicodeUTF8))
+        self.twDetails.headerItem().setText(3, QtGui.QApplication.translate("MainWindow", "Ort", None, QtGui.QApplication.UnicodeUTF8))
+        self.twDetails.headerItem().setText(4, QtGui.QApplication.translate("MainWindow", "Beschreibung", None, QtGui.QApplication.UnicodeUTF8))
         self.twLog.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Log", None, QtGui.QApplication.UnicodeUTF8))
+
+
 
         
 class MyMainWindow(QtGui.QMainWindow, BrainMessages):    
@@ -84,7 +93,7 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
     def pbBearbeitenClicked(self):
         item = self.ui.twSuche.currentItem()
         if not item:
-            self.log("Kein Item selektiert!")
+            #self.log("Kein Item selektiert!")
             return
         #index = self.ui.twSuche.indexOfTopLevelItem(item)
         #print index
@@ -117,7 +126,7 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
     def pbEntfernenClicked(self):
         item = self.ui.twSuche.currentItem()
         if not item:
-            self.log("Kein Item selektiert!")
+            #self.log("Kein Item selektiert!")
             return
         self.brain.deleteQueryEntryById(item.myUuid)
         
@@ -139,15 +148,37 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         self.ui.twSuche.clear()
         
         ''' Todo: Sortiert ausgeben? '''
-        for key, query in sorted(userQueries.items()):
+        for key, query in userQueries.items():
             newItem = QtGui.QTreeWidgetItem(self.ui.twSuche)
+            
             newItem.setText(0, query.title)
-            newItem.setText(1, query.place)
-            newItem.setText(2, query.description)
+            
+            self.fromHour = str(query.query_time.from_hour)
+            if len(self.fromHour) <= 1:
+                self.fromHour = "0" + self.fromHour 
+            self.fromMinute = str(query.query_time.from_minute)
+            if len(self.fromMinute) <= 1:
+                self.fromMinute = "0" + self.fromMinute
+            self.untilHour = str(query.query_time.until_hour)
+            if len(self.untilHour) <= 1:
+                self.untilHour = "0" + self.untilHour
+            self.untilMinute = str(query.query_time.until_minute)
+            if len(self.untilMinute) <= 1:
+                self.untilMinute = "0" + self.untilMinute
+            newItem.setText(1, self.fromHour + ":" + self.fromMinute +
+                             "-" + self.untilHour + ":" + self.untilMinute)
+            #newItem.setText(2, query.query_time.weekdays)
+            newItem.setText(3, query.place)
+            
+            self.newDescriptionWithoutReturns = unicode(str(query.description).replace("\n", " "))
+            
+            #exifUI.setWindowTitle(QtGui.QApplication.translate("exifUI", "Form", None, QtGui.QApplication.UnicodeUTF8))
+            newItem.setText(4, self.newDescriptionWithoutReturns)
             newItem.myUuid = key
             newItem.myQuery = query
             self.ui.twLog.addTopLevelItem(newItem)
 
+    ''' ##################################################################### '''
 
     def log(self, inString):
         sItemText = strftime("%H:%M:%S", localtime()) + ": " + inString
