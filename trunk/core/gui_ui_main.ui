@@ -50,21 +50,21 @@
        <item row="0" column="0">
         <widget class="QPushButton" name="pbNeu">
          <property name="text">
-          <string>Neu</string>
+          <string>&amp;Neu</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
         <widget class="QPushButton" name="pbBearbeiten">
          <property name="text">
-          <string>Bearbeiten</string>
+          <string>&amp;Bearbeiten</string>
          </property>
         </widget>
        </item>
        <item row="0" column="2">
         <widget class="QPushButton" name="pbEntfernen">
          <property name="text">
-          <string>Entfernen</string>
+          <string>&amp;Entfernen</string>
          </property>
         </widget>
        </item>

@@ -62,15 +62,15 @@ class Ui_MainWindow(object):
         self.twSuche.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Titel", None, QtGui.QApplication.UnicodeUTF8))
         self.twSuche.headerItem().setText(1, QtGui.QApplication.translate("MainWindow", "Ort", None, QtGui.QApplication.UnicodeUTF8))
         self.twSuche.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Beschreibung", None, QtGui.QApplication.UnicodeUTF8))
-        self.pbNeu.setText(QtGui.QApplication.translate("MainWindow", "Neu", None, QtGui.QApplication.UnicodeUTF8))
-        self.pbBearbeiten.setText(QtGui.QApplication.translate("MainWindow", "Bearbeiten", None, QtGui.QApplication.UnicodeUTF8))
-        self.pbEntfernen.setText(QtGui.QApplication.translate("MainWindow", "Entfernen", None, QtGui.QApplication.UnicodeUTF8))
+        self.pbNeu.setText(QtGui.QApplication.translate("MainWindow", "&Neu", None, QtGui.QApplication.UnicodeUTF8))
+        self.pbBearbeiten.setText(QtGui.QApplication.translate("MainWindow", "&Bearbeiten", None, QtGui.QApplication.UnicodeUTF8))
+        self.pbEntfernen.setText(QtGui.QApplication.translate("MainWindow", "&Entfernen", None, QtGui.QApplication.UnicodeUTF8))
         self.lbErgebnisse.setText(QtGui.QApplication.translate("MainWindow", "Ergebnisse:", None, QtGui.QApplication.UnicodeUTF8))
         self.twDetails.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Titel", None, QtGui.QApplication.UnicodeUTF8))
         self.twDetails.headerItem().setText(1, QtGui.QApplication.translate("MainWindow", "Ort", None, QtGui.QApplication.UnicodeUTF8))
         self.twDetails.headerItem().setText(2, QtGui.QApplication.translate("MainWindow", "Beschreibung", None, QtGui.QApplication.UnicodeUTF8))
         self.twLog.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Log", None, QtGui.QApplication.UnicodeUTF8))
-        
+
         
 class MyMainWindow(QtGui.QMainWindow):    
     def pbNeuClicked(self):

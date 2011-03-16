@@ -19,6 +19,7 @@ class Ui_NewQueryWindow(object):
         self.pbAbbrechen.setObjectName("pbAbbrechen")
         self.pbSpeichern = QtGui.QPushButton(NewQueryWindow)
         self.pbSpeichern.setGeometry(QtCore.QRect(290, 360, 85, 27))
+        self.pbSpeichern.setDefault(True)
         self.pbSpeichern.setObjectName("pbSpeichern")
         self.cbSo = QtGui.QCheckBox(NewQueryWindow)
         self.cbSo.setGeometry(QtCore.QRect(328, 180, 45, 22))
@@ -97,8 +98,8 @@ class Ui_NewQueryWindow(object):
     def retranslateUi(self, NewQueryWindow):
         NewQueryWindow.setWindowTitle(QtGui.QApplication.translate("NewQueryWindow", "Neue Suche", None, QtGui.QApplication.UnicodeUTF8))
         self.lbBeschreibung.setText(QtGui.QApplication.translate("NewQueryWindow", "Beschreibung:", None, QtGui.QApplication.UnicodeUTF8))
-        self.pbAbbrechen.setText(QtGui.QApplication.translate("NewQueryWindow", "Abbrechen", None, QtGui.QApplication.UnicodeUTF8))
-        self.pbSpeichern.setText(QtGui.QApplication.translate("NewQueryWindow", "Speichern", None, QtGui.QApplication.UnicodeUTF8))
+        self.pbAbbrechen.setText(QtGui.QApplication.translate("NewQueryWindow", "&Abbrechen", None, QtGui.QApplication.UnicodeUTF8))
+        self.pbSpeichern.setText(QtGui.QApplication.translate("NewQueryWindow", "&Speichern", None, QtGui.QApplication.UnicodeUTF8))
         self.cbSo.setText(QtGui.QApplication.translate("NewQueryWindow", "So", None, QtGui.QApplication.UnicodeUTF8))
         self.cbSa.setText(QtGui.QApplication.translate("NewQueryWindow", "Sa", None, QtGui.QApplication.UnicodeUTF8))
         self.cbMi.setText(QtGui.QApplication.translate("NewQueryWindow", "Mi", None, QtGui.QApplication.UnicodeUTF8))
@@ -146,11 +147,30 @@ class MyNewQueryWindow(QtGui.QDialog):
         self.newFromMinute = self.ui.teBeginn.time().minute()
         self.newUntilHour = self.ui.teEnde.time().hour()
         self.newUntilMinute = self.ui.teEnde.time().minute()
-        ''' def __init__(self, from_hour, from_minute, until_hour, until_minute, weekdays): '''
-        self.newQueryTime = QueryTime(self.newFromHour, self.newFromMinute, self.newUntilHour, self.newUntilMinute)
         
-        ''' Todo: EXCEPTION ABFANGEN?! '''
-        ''' Todo: Weekdays ?! '''
+        self.newWeekdays = []
+        
+        if self.ui.cbMo.isChecked():
+            self.newWeekdays.append(QueryTime.WEEKDAYS[0])
+        if self.ui.cbDi.isChecked():
+            self.newWeekdays.append(QueryTime.WEEKDAYS[1])
+        if self.ui.cbMi.isChecked():
+            self.newWeekdays.append(QueryTime.WEEKDAYS[2])
+        if self.ui.cbDo.isChecked():
+            self.newWeekdays.append(QueryTime.WEEKDAYS[3])
+        if self.ui.cbFr.isChecked():
+            self.newWeekdays.append(QueryTime.WEEKDAYS[4])
+        if self.ui.cbSa.isChecked():
+            self.newWeekdays.append(QueryTime.WEEKDAYS[5])
+        if self.ui.cbSo.isChecked():
+            self.newWeekdays.append(QueryTime.WEEKDAYS[6])
+        
+        ''' def __init__(self, from_hour, from_minute, until_hour, until_minute, weekdays): '''
+        try:
+            self.newQueryTime = QueryTime(self.newFromHour, self.newFromMinute, self.newUntilHour, self.newUntilMinute, self.newWeekdays)
+        except ValueError:
+            QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte mindestens einen Kalendertag angeben!", QtGui.QMessageBox.Ok)
+            return
         
         self.newTitle = self.ui.leTitel.text()
         self.newPlace = self.ui.leOrt.text()
@@ -160,7 +180,5 @@ class MyNewQueryWindow(QtGui.QDialog):
         
         ''' Todo: Query an Brain schicken '''
         createNewQueryEntry(self.newQuery)
-        
-        ''' Todo: Brain muss nun ein Refresh an GUI schicken '''
         
         self.close()
