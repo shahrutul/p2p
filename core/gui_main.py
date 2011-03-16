@@ -146,12 +146,21 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
     
     ''' ##################################################################### '''
 
-    def reloadQueryEntries(self, userQueries):
-        self.ui.twSuche.clear()
+    def reloadQueryEntries(self, userQueries):        
+        self.internalReloadEntries(userQueries, self.ui.twSuche)
+            
+            
+    def reloadResultEntries(self, userResults):
+        self.internalReloadEntries(userResults, self.ui.twDetails)
+
+    ''' ##################################################################### '''
+
+    def internalReloadEntries(self, queries, treeWidget):
+        treeWidget.clear()
         
         ''' Todo: Sortiert ausgeben? '''
-        for key, query in userQueries.items():
-            newItem = QtGui.QTreeWidgetItem(self.ui.twSuche)
+        for key, query in queries.items():
+            newItem = QtGui.QTreeWidgetItem(treeWidget)
             
             newItem.setText(0, query.title)
             
@@ -191,9 +200,9 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
             newItem.setText(4, self.newDescriptionWithoutReturns)
             newItem.myUuid = key
             newItem.myQuery = query
-            self.ui.twLog.addTopLevelItem(newItem)
-
-    ''' ##################################################################### '''
+            treeWidget.addTopLevelItem(newItem)
+            
+            
 
     def log(self, inString):
         sItemText = strftime("%H:%M:%S", localtime()) + ": " + inString
@@ -239,12 +248,20 @@ if __name__ == "__main__":
     myMainWindow.brain = Brain()
     myMainWindow.brain.registerUI(myMainWindow)
     
-    ''' TESTEINTRAG '''
+    ''' QUERY: TESTEINTRAG '''
     list = []
     list.append(QueryTime.WEEKDAYS[2])
     newQueryTime = QueryTime(9, 11, 23, 42, list)
     newQuery = Query("Test", "Testort", newQueryTime, "Testbeschreibung")
     myMainWindow.brain.createNewQueryEntry(newQuery)
+    
+    ''' RESULTS: TESTEINTRAG '''
+    rList = []
+    rList.append(QueryTime.WEEKDAYS[4])
+    rNewQueryTime = QueryTime(5, 15, 7, 30, rList)
+    rNewQuery = Query("Kaugummi", "HHU", rNewQueryTime, "dies ist eine Testbeschreibung")
+    rDict = dict({'a49298d8-4fe9-11e0-a6cb-00166fc3d7af': rNewQuery})
+    myMainWindow.reloadResultEntries(rDict)
     
     #brainTimer = QtCore.QTimer()
     #QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)

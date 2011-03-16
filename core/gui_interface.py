@@ -121,17 +121,12 @@ class UIMessages(object):
     ''' HINWEIS: reloadSearchEntries oder getAllSearchEntries eventuell überflüssig '''
 
 class BrainMessages(object):    
-    ''' brain --> GUI '''
     def reloadQueryEntries():
         raise NotImplementedError
-
-    ''' ###### 3 ###### '''
-    ''' brain --> GUI '''
-    def reloadResultsForQueryId(id):
+    
+    def reloadResultEntries():
         raise NotImplementedError
-
-    ''' ###### 6 ###### '''
-    ''' brain --> GUI '''
+    
     def pickupChatMsg():
         raise NotImplementedError
 
