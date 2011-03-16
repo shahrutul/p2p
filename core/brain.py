@@ -330,9 +330,9 @@ class Brain(UIMessages):
         raise NotImplementedError
 
     def getDetailResult(self, queryId, resultId):
-        raise NotImplementedError
+        #self.query_results[queryId]
 
-    def sendChatMsg(self,msg, receiver):
+    def sendChatMsg(self, msg, receiver):
         raise NotImplementedError
 
     def deleteQueryEntryById(self, id):
@@ -342,6 +342,7 @@ class Brain(UIMessages):
         """ Resumes from suspend. Initializes all interfaces """
         self.ping_cache = {}
         self.user_queries = {}
+        self.query_results = {}
         self.interaction_pause = Wait(2)
         self.neigh_candidates = TimeStampDict()
         self.neigh_refresh = TimeStampDict()
