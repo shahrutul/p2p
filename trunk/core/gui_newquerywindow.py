@@ -128,6 +128,12 @@ class MyNewQueryWindow(QtGui.QDialog):
         
         
     def pbSpeichernClicked(self):
+        
+        if self.myIsEdited:
+            # delete old query-entry
+            self.parent().brain.deleteQueryEntryById(self.myUuidToDelete)
+        
+        # ... and create a new query-entry        
         if len(self.ui.leTitel.text()) <= 0:
             QtGui.QMessageBox.question(self, 'Fehlende Angaben', "Bitte einen Titel angeben!", QtGui.QMessageBox.Ok)
             self.ui.leTitel.setFocus()

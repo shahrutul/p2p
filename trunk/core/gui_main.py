@@ -6,7 +6,7 @@
 
 from brain import Brain
 
-from gui_interface import BrainMessages, Query
+from gui_interface import BrainMessages, Query, QueryTime
 from gui_newquerywindow import MyNewQueryWindow
 from gui_detailswindow import MyDetailsWindow
 
@@ -77,42 +77,60 @@ class Ui_MainWindow(object):
 class MyMainWindow(QtGui.QMainWindow, BrainMessages):    
     def pbNeuClicked(self):
         self.myNewQueryWindow = MyNewQueryWindow(self)
+        self.myNewQueryWindow.myIsEdited = False
         self.myNewQueryWindow.show()
-                
-        '''self.addDummySearch()'''
     
     
     def pbBearbeitenClicked(self):
-        self.log("Bearbeiten wurde angeklickt!")
-        '''
         item = self.ui.twSuche.currentItem()
         if not item:
-            self.log("Kein Item ausgewaehlt!")
+            self.log("Kein Item selektiert!")
             return
-        index = self.ui.twSuche.indexOfTopLevelItem(item)
-        print index
-        '''
+        #index = self.ui.twSuche.indexOfTopLevelItem(item)
+        #print index
+        self.myNewQueryWindow = MyNewQueryWindow(self)
+        self.myNewQueryWindow.ui.leTitel.setText(item.myQuery.title)
+        self.myNewQueryWindow.ui.leOrt.setText(item.myQuery.place)
+        self.myNewQueryWindow.ui.teBeginn.setTime(QtCore.QTime(item.myQuery.query_time.from_hour, item.myQuery.query_time.from_minute,0,0))
+        self.myNewQueryWindow.ui.teEnde.setTime(QtCore.QTime(item.myQuery.query_time.until_hour, item.myQuery.query_time.until_minute,0,0))
+        if QueryTime.WEEKDAYS[0] in item.myQuery.query_time.weekdays:
+            self.myNewQueryWindow.ui.cbMo.setChecked(True)
+        if QueryTime.WEEKDAYS[1] in item.myQuery.query_time.weekdays:
+            self.myNewQueryWindow.ui.cbDi.setChecked(True)
+        if QueryTime.WEEKDAYS[2] in item.myQuery.query_time.weekdays:
+            self.myNewQueryWindow.ui.cbMi.setChecked(True)
+        if QueryTime.WEEKDAYS[3] in item.myQuery.query_time.weekdays:
+            self.myNewQueryWindow.ui.cbDo.setChecked(True)
+        if QueryTime.WEEKDAYS[4] in item.myQuery.query_time.weekdays:
+            self.myNewQueryWindow.ui.cbFr.setChecked(True)
+        if QueryTime.WEEKDAYS[5] in item.myQuery.query_time.weekdays:
+            self.myNewQueryWindow.ui.cbSa.setChecked(True)
+        if QueryTime.WEEKDAYS[6] in item.myQuery.query_time.weekdays:
+            self.myNewQueryWindow.ui.cbSo.setChecked(True)
+        self.myNewQueryWindow.ui.pteBeschreibung.clear()
+        self.myNewQueryWindow.ui.pteBeschreibung.insertPlainText(item.myQuery.description)
+        self.myNewQueryWindow.myIsEdited = True
+        self.myNewQueryWindow.myUuidToDelete = item.myUuid
+        self.myNewQueryWindow.show()
     
         
     def pbEntfernenClicked(self):
-        self.log("Entfernen wurde angeklickt!")
-        self.myDetailsWindow = MyDetailsWindow()
-        self.myDetailsWindow.ui.tabs.setCurrentIndex(0)
-        ''' Todo: chat(1) wieder rausnehmen '''
-        self.myDetailsWindow.ui.tabs.setTabText(1, "Chat (1)")
-        self.myDetailsWindow.show()
-    
-    
-    def twSucheItemClicked(self, item = None, columnIndex = None): 
-        self.log("Suchefeld angeklickt.")
-        if columnIndex != None:
-            pass
-    
+        item = self.ui.twSuche.currentItem()
+        if not item:
+            self.log("Kein Item selektiert!")
+            return
+        self.brain.deleteQueryEntryById(item.myUuid)
+        
     
     def twDetailsItemDoubleClicked(self, item = None, columnIndex = None):
         self.log("Detailfeld doppelt angeklickt.")
         if columnIndex != None:
             pass
+        self.myDetailsWindow = MyDetailsWindow()
+        self.myDetailsWindow.ui.tabs.setCurrentIndex(0)
+        ''' Todo: chat(1) wieder rausnehmen '''
+        self.myDetailsWindow.ui.tabs.setTabText(1, "Chat (1)")
+        self.myDetailsWindow.show()
 
     
     ''' ##################################################################### '''
@@ -120,7 +138,8 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
     def reloadQueryEntries(self, userQueries):
         self.ui.twSuche.clear()
         
-        for key, query in userQueries.items():
+        ''' Todo: Sortiert ausgeben? '''
+        for key, query in sorted(userQueries.items()):
             newItem = QtGui.QTreeWidgetItem(self.ui.twSuche)
             newItem.setText(0, query.title)
             newItem.setText(1, query.place)
@@ -128,14 +147,6 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
             newItem.myUuid = key
             newItem.myQuery = query
             self.ui.twLog.addTopLevelItem(newItem)
-    
-    
-    def addDummySearch(self):
-        newItem = QtGui.QTreeWidgetItem(self.ui.twSuche)
-        newItem.setText(0, "a")
-        newItem.setText(1, "b")
-        newItem.setText(2, "c")
-        self.ui.twLog.addTopLevelItem(newItem)
 
 
     def log(self, inString):
@@ -157,7 +168,7 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         QtCore.QObject.connect(self.ui.pbNeu, QtCore.SIGNAL('clicked()'), self.pbNeuClicked)
         QtCore.QObject.connect(self.ui.pbBearbeiten, QtCore.SIGNAL('clicked()'), self.pbBearbeitenClicked)
         QtCore.QObject.connect(self.ui.pbEntfernen, QtCore.SIGNAL('clicked()'), self.pbEntfernenClicked)
-        QtCore.QObject.connect(self.ui.twSuche, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), self.twSucheItemClicked)
+        QtCore.QObject.connect(self.ui.twSuche, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.pbBearbeitenClicked)
         QtCore.QObject.connect(self.ui.twDetails, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.twDetailsItemDoubleClicked)
 
 
@@ -182,9 +193,9 @@ if __name__ == "__main__":
     myMainWindow.brain = Brain()
     myMainWindow.brain.registerUI(myMainWindow)
     
-    brainTimer = QtCore.QTimer()
-    QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
-    brainTimer.start(1)
+    #brainTimer = QtCore.QTimer()
+    #QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
+    #brainTimer.start(1)
     
     myMainWindow.show()    
     sys.exit(app.exec_())
