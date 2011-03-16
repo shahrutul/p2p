@@ -17,7 +17,7 @@ import time
 import random
 import uuid
 
-import gui_interface
+from gui_interface import UIMessages, Query
 from decorators import coroutine, singleton
 from network_nerve import NetworkNeuron
 from signal_protocol import Signal, ProtocolError
@@ -310,14 +310,38 @@ class TimeStampDict(dict):
 
 
 @singleton
-class Brain(object):
+class Brain(UIMessages):
     """ Process input, produce output """
-    def __init__(self):
+    def __init__(self, ui = None):
         self.resume()
+
+    def createNewQueryEntry(entry):
+        if not isinstance(entry, Query):
+            raise ValueError("not a query!")
+        self.user_queries[uuid.uuid1()] = entry
+
+    def getAllQueryEntries():
+        return self.user_queries.copy()
+
+    def getQueryEntryById(id):
+        return self.user_queries.get(id)
+
+    def setQueryEntryById(id, data):
+        raise NotImplementedError
+    
+    def getDetailResult(queryId, resultId):
+        raise NotImplementedError
+    
+    def sendChatMsg(msg, receiver):
+        raise NotImplementedError
+    
+    def deleteQueryEntryById(id):
+        self.user_queries.pop(id, None)
 
     def resume(self):
         """ Resumes from suspend. Initializes all interfaces """
         self.ping_cache = {}
+        self.user_queries = {}
         self.interaction_pause = Wait(2)
         self.neigh_candidates = TimeStampDict()
         self.neigh_refresh = TimeStampDict()
@@ -329,15 +353,7 @@ class Brain(object):
         self.network_cortex = network_cortex(self)
         self.network_neuron = NetworkNeuron(self.network_cortex)
         self.network_interaction = network_interaction(self)
-
         self.errors_to_ui = errors_to_ui()
-
-        import logging
-        class GUILogger(logging.Handler):
-            def emit(self, record):
-                msg = self.format(record)
-                gui_interface.logMessage(msg)
-        logs.logger.addHandler(GUILogger())
 
     def suspend(self):
         """ Closes all connections, cleans up and 'suspends'. """
