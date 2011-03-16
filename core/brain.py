@@ -312,8 +312,11 @@ class TimeStampDict(dict):
 @singleton
 class Brain(UIMessages):
     """ Process input, produce output """
-    def __init__(self, ui = None):
+    def __init__(self):
         self.resume()
+
+    def registerUI(self, ui):
+        self.ui = ui
 
     def createNewQueryEntry(self, entry):
         if not isinstance(entry, Query):
@@ -330,7 +333,7 @@ class Brain(UIMessages):
         raise NotImplementedError
 
     def getDetailResult(self, queryId, resultId):
-        #self.query_results[queryId]
+        self.query_results[queryId]
 
     def sendChatMsg(self, msg, receiver):
         raise NotImplementedError
@@ -340,6 +343,7 @@ class Brain(UIMessages):
 
     def resume(self):
         """ Resumes from suspend. Initializes all interfaces """
+        self.ui = None
         self.ping_cache = {}
         self.user_queries = {}
         self.query_results = {}
