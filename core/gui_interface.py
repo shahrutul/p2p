@@ -5,26 +5,40 @@
 # The interface connects the brain and GUI.
 
 #from gui_main import myMainWindow
-
+import datetime
 class QueryTime(object):
     """ Query time data storage struct """
     WEEKDAYS = ["mo", "tue", "wed", "thu", "fri", "sat", "sun"]
-    class Weekday: mo, tue, wed, thu, fri, sat, sun = QueryTime.WEEKDAYS
+
     def __init__(self, from_hour, from_minute, until_hour,
                  until_minute, weekdays):
+        # validate hour/minutes values
+        datetime.time(from_hour, from_minute)
+        datetime.time(until_hour, until_minute)
+        # check weekdays
+        self.weekdays = []
+        for day in weekdays:
+            if day in QueryTime.WEEKDAYS:
+                self.weekdays.append(day)
+            elif 0 <= day < len(QueryTime.WEEKDAYS):
+                self.weekdays.append(QueryTime.WEEKDAYS[day])
+            else:
+                raise ValueError("weekday must be in 0..6 or %r" %
+                                   (QueryTime.WEEKDAYS))
+                
         self.from_hour = from_hour
         self.from_minute = from_minute
         self.until_hour = until_hour
         self.until_minute = until_minute
-        self.weekdays = weekdays
+        self.weekdays = list(set(self.weekdays))
         
 class Query(object):
     """ Query data struct for gui communications"""
     def __init__(self, title, place, query_time, description, id_=None):        
-        self.title = title
-        self.place = place
+        self.title = str(title)
+        self.place = str(place)
         self.query_time = query_time
-        self.description = description
+        self.description = str(description)
         self.id = id_
 
 

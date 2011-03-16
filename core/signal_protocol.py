@@ -23,15 +23,14 @@ ping(ping_id, ttl, hops)
 # args: string, number, number
 # returns: at least one pong
 
-
 # whoami: discover own IP address and invite for neighbourship
 whoami(port)
 # args: number
 # returns: youare
 
 # query: search for data
-query(mydata, ttl, hops)
-# args: object, number, number
+query(query_data, IP, port, ttl, hops)
+# args: object, string, number, number, number
 # returns: query hit
 
 # pong: reply to ping with contact data
@@ -44,12 +43,31 @@ youare(IP, port)
 # args: string, number
 
 # query hit: reply to a query
-query_hit(IP, port, data)
+query_hit(reply_query_data)
 # args: string, number, object
 # returns: nothing
+
+Data structs:
+query_data: JSON object
+  id = string
+  title = string
+  place = string
+  description = string
+  query_time = query_time_obj
+
+query_time_obj <=> JSON object:
+  from_hour: number in 0..23
+  from_minute: number in 0..59
+  until_hour: number in 0..23
+  until_minute: number in 0..59
+  weekdays: list with one or more weekday entries
+            'mo', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'
+
+
 """
 import json
 from config import logs  # pylint: disable=E0611
+from gui_interface import Query, QueryTime
 
 
 class ProtocolError(Exception):  # pylint: disable=C0111
@@ -69,7 +87,39 @@ def arg_type_check(types, *args):
 
     return True
 
-
+class QueryEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Query):
+            return {'title': obj.title,
+                    'place': obj.place,
+                    'query_time': obj.query_time,
+                    'description': obj.description,
+                    'id': obj.id}
+        elif isinstance(obj, QueryTime):
+            return { 'from_hour': obj.from_hour,
+                     'from_minute': obj.from_minute,
+                     'until_hour': obj.until_hour,
+                     'until_minute': obj.until_minute,
+                     'weekdays': obj.weekdays}
+        return json.JSONEncoder.default(self, obj)
+    
+def decode_query(dict_):
+    if 'query_time' in dict_:
+        vals = dict_['query_time']
+        q_time = QueryTime(vals['from_hour'],
+                           vals['from_minute'],
+                           vals['until_hour'],
+                           vals['until_minute'],
+                           vals['weekdays'])
+        return Query(dict_['title'],
+                     dict_['place'],
+                     q_time,
+                     dict_['description'],
+                     dict_['id'])
+    
+    else:
+        return dict_
+    
 class Signal(object):
     """ Provides common signals for communication and
     a message to/from JSON converter. Accepts 'registered'
@@ -83,7 +133,8 @@ class Signal(object):
               'whoami': (int,),
               'youare': (basestring, int),
               'ping': (basestring, int, int),
-              'pong': (basestring, int)
+              'pong': (basestring, int),
+              'query': (Query, int, int)
              }
 
     def __init__(self, type_, content=()):
@@ -93,9 +144,11 @@ class Signal(object):
                 content = (content,)
             if not arg_type_check(arg_types, *content):
                 raise ProtocolError("Expected: %s(%s), not %s(%s)" %
-                                    (type_, arg_types, type_, content))
+                      (type_, map(lambda obj:
+                                  getattr(obj,"__name__"),
+                                  arg_types),
+                              type_, content))
         except (ValueError, TypeError, KeyError), reason:
-            print reason
             raise ProtocolError("type = %s, content = %s" % (type_, content))
 
         self.type = type_
@@ -109,11 +162,11 @@ class Signal(object):
         """ Deserializes JSON objects to Signals """
         logs.logger.debug("convert: %s" % data)
         try:
-            json_obj = json.loads(data)
+            json_obj = json.loads(data, object_hook = decode_query)
             return Signal(json_obj['type'], json_obj['content'])
         except (TypeError, ValueError), reason:
             raise ProtocolError(data, reason)
-        except KeyError:
+        except KeyError, reason:
             err = """Expected: '{"%s":"x", "%s":["y","z"]}', not %s""" % \
                   ('type', 'content', data)
             raise ProtocolError(err)
@@ -124,7 +177,8 @@ class Signal(object):
         logs.logger.debug("serialize: %s", self)
         try:
             return json.dumps({'type': self.type,
-                               'content': self.content}) + Signal.TERMINATOR
+                               'content': self.content},
+                              cls = QueryEncoder) + Signal.TERMINATOR
         except (TypeError), reason:
             logs.logger.critical("serializer exception, reason %s" % reason)
             raise ProtocolError(reason)
