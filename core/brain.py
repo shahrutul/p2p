@@ -16,13 +16,14 @@ resume: Brain.resume()
 import time
 import random
 import uuid
+import pickle
 
 from gui_interface import UIMessages, Query, QueryTime
 from decorators import coroutine, singleton
 from network_nerve import NetworkNeuron
 from signal_protocol import Signal, ProtocolError
 from config import (network, logs, settings,  # pylint: disable=E0611
-                    last_known_neighbours)
+                    last_known_neighbours, queries)
 
 
 def time_stamp():
@@ -437,6 +438,8 @@ class Brain(UIMessages):
 
     def registerUI(self, ui):
         self.ui = ui
+        if len(self.user_queries) > 0:
+            ui.reloadQueryEntries(self.user_queries.copy())
 
 
     def createNewQueryEntry(self, query):
@@ -473,9 +476,9 @@ class Brain(UIMessages):
         """ Resumes from suspend. Initializes all interfaces """
         self.ui = None
         self.ping_cache = {}
-        self.user_queries = {}
+        self.user_queries = self.load_queries()
         self.query_results = {}
-        self.queries_to_send = set()
+        self.queries_to_send = set(self.user_queries.values())
         self.query_cache = {}
         self.interaction_pause = Wait(2)
         self.neigh_candidates = TimeStampDict()
@@ -490,11 +493,6 @@ class Brain(UIMessages):
         self.network_interaction = network_interaction(self)
         self.notify_ui = notify_ui(self)
 
-        ##dummy data
-        qt = QueryTime(1,0,2,0,['mo'])
-        q = Query("P2P lernen", "ddorf", qt, "gerne auch zu Hause")
-        self.createNewQueryEntry(q)
-
     def suspend(self):
         """ Closes all connections, cleans up and 'suspends'. """
         self.active = False
@@ -503,6 +501,7 @@ class Brain(UIMessages):
         self.network_interaction.close()
         settings.last_known_neighbours = self.neighbours.keys()
         settings.store()
+        self.store_queries()
 
     def process(self, amount=network.default_listen_time):
         """ process incoming signals and generates some active output
@@ -524,3 +523,17 @@ class Brain(UIMessages):
             # hm, we have a problem!
             #self.errors_to_ui.send("No known neighbours!")
             self.notify_ui.send(('error', "No known neighbours!"))
+
+    def store_queries(self):
+        file_name = settings.queries.user_queries_db
+        with open(file_name, "wb") as query_db:
+            pickle.dump(self.user_queries, query_db)
+
+    def load_queries(self):
+        file_name = settings.queries.user_queries_db
+        try:
+            with open(file_name, "rb") as query_db:
+                queries = pickle.load(query_db)
+                return queries
+        except IOError:
+            return {}
