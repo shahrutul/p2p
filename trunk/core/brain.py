@@ -90,8 +90,8 @@ def ping_processor(brain):
             # send broadcast to neighbours
             if ttl > 0:
                 for neigh in brain.neighbours.keys():
-                    #if neigh[0] == synapse.organ_id[0]:   # TODO: reenable it for "real world"
-                    #    continue
+                    if neigh[0] == synapse.organ_id[0]:  
+                        continue
                     neigh_synapse = brain.network_neuron.connect(neigh, synapse)
                     logs.logger.debug("broadcast %s to %s" %(ping, str(neigh)))
                     neigh_synapse.transmit(Signal('ping',
@@ -157,8 +157,8 @@ def query_processor(brain, filter):
             # send broadcast to neighbours
             if ttl > 0:
                 for neigh in brain.neighbours.keys():
-                    #if neigh[0] == synapse.organ_id[0]:   # TODO: reenable it for "real world"
-                    #    continue
+                    if neigh[0] == synapse.organ_id[0]:
+                        continue
                     neigh_synapse = brain.network_neuron.connect(neigh, synapse)
                     logs.logger.debug("broadcast %s to %s" %(query, str(neigh)))
                     neigh_synapse.transmit(Signal('query',
@@ -359,6 +359,10 @@ def network_cortex(brain):
 
             elif signal.type == 'query_hit':
                 query_res_filter.send(signal.content)
+                if synapse.signal_target is not None:
+                    logs.logger.debug("pipes query_hit to %s" %
+                                      str(synapse.signal_target))
+                    synapse.signal_target.transmit(signal)
 
         except ProtocolError, reason:
             logs.logger.debug("network cortex error: %s,%s" %
