@@ -6,12 +6,14 @@
 
 from brain import Brain
 
+from gui_interface import BrainMessages, Query
 from gui_newquerywindow import MyNewQueryWindow
 from gui_detailswindow import MyDetailsWindow
 
 from PySide import QtCore, QtGui
 from time import localtime, strftime
 import sys
+import logging
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -72,9 +74,9 @@ class Ui_MainWindow(object):
         self.twLog.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Log", None, QtGui.QApplication.UnicodeUTF8))
 
         
-class MyMainWindow(QtGui.QMainWindow):    
+class MyMainWindow(QtGui.QMainWindow, BrainMessages):    
     def pbNeuClicked(self):
-        self.myNewQueryWindow = MyNewQueryWindow()
+        self.myNewQueryWindow = MyNewQueryWindow(self)
         self.myNewQueryWindow.show()
                 
         '''self.addDummySearch()'''
@@ -115,6 +117,18 @@ class MyMainWindow(QtGui.QMainWindow):
     
     ''' ##################################################################### '''
 
+    def reloadQueryEntries(self, userQueries):
+        self.ui.twSuche.clear()
+        
+        for key, query in userQueries.items():
+            newItem = QtGui.QTreeWidgetItem(self.ui.twSuche)
+            newItem.setText(0, query.title)
+            newItem.setText(1, query.place)
+            newItem.setText(2, query.description)
+            newItem.myUuid = key
+            newItem.myQuery = query
+            self.ui.twLog.addTopLevelItem(newItem)
+    
     
     def addDummySearch(self):
         newItem = QtGui.QTreeWidgetItem(self.ui.twSuche)
@@ -147,16 +161,31 @@ class MyMainWindow(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.twDetails, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.twDetailsItemDoubleClicked)
 
 
+class GUILogger(logging.Handler):
+    
+    def __init__(self, myMainWindow_):
+        logging.Handler.__init__(self)
+        self.myMainWindow = myMainWindow_
+    
+    def emit(self, record):
+        msg = self.format(record)
+        self.myMainWindow.log(msg)
+
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myMainWindow = MyMainWindow()
-    '''
+    
+    myGUILogger = GUILogger(myMainWindow)
+    logging.getLogger().addHandler(myGUILogger)
+
     myMainWindow.brain = Brain()
+    myMainWindow.brain.registerUI(myMainWindow)
     
     brainTimer = QtCore.QTimer()
     QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
     brainTimer.start(1)
-    '''    
+    
     myMainWindow.show()    
     sys.exit(app.exec_())
     
