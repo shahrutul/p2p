@@ -178,7 +178,9 @@ class MyNewQueryWindow(QtGui.QDialog):
         ''' def __init__(self, title, place, query_time, description, id_=None): '''
         self.newQuery = Query(self.newTitle, self.newPlace, self.newQueryTime, self.newDescription)
         
+        
+        
         ''' Todo: Query an Brain schicken '''
-        createNewQueryEntry(self.newQuery)
+        self.parent().brain.createNewQueryEntry(self.newQuery)
         
         self.close()
