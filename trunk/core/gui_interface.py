@@ -45,6 +45,9 @@ class Query(object):
         self.id = id_
 
 class UIMessages(object):
+
+    def registerUI(self, ui):
+        raise NotImplementedError
     ''' ###### 1 ######'''
     ''' GUI --> brain '''
     def createNewQueryEntry(self, newSearchEntry):
