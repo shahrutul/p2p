@@ -114,7 +114,7 @@ def query_filter(brain):
         logs.logger.debug("a query %s from %s:%s" % (str(query), ip, port))
         new_entries = False
         for user_query in brain.user_queries.values():
-            if user_query.compare(query) or 1>0: # TODO: remove 1>0!
+            if user_query.compare(query):
                 brain.query_results[query.id] = query
                 new_entries = True
         if new_entries:
@@ -129,7 +129,7 @@ def query_processor(brain, filter):
             synapse, signal = (yield)
             query, IP, port, ttl, hops = signal
 
-            if query.id in brain.query_cache and 1>2: # TODO: remove 1>2
+            if query.id in brain.query_cache:
                 logs.logger.debug("discard query request %s" % str(query))
                 synapse.disconnect()
                 continue
@@ -377,7 +377,7 @@ def notify_ui(brain):
         if not brain.ui:
             continue
         if message == 'new results':
-            brain.ui.reloadResultEntries(brain.query_results.copy())   
+            brain.ui.reloadResultEntries(brain.query_results.copy())
 
 
 class Wait():
