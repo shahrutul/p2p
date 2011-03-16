@@ -190,13 +190,14 @@ def network_interaction(brain):
 
         # check, if enough neighbours or candidates available,
         # else explore the network:
-        if len(brain.neighbours) < network.min_neighbours:
+        if len(brain.neighbours) < network.max_neighbours:
             if len(brain.neigh_candidates):
-                while len(brain.neighbours) < network.min_neighbours and \
+                while len(brain.neighbours) < network.max_neighbours and \
                       len(brain.neigh_candidates) > 0:
                     brain.neighbours.update([brain.neigh_candidates.popitem()])
             else:
-                explorer.next()
+                if len(brain.neigh_candidates) < network.min_neighbours:
+                    explorer.next()
         # it is time for a cleanup?
         # remove too old entries from neigh_candidates, neigh_refresh and
         # ping_cache
@@ -342,6 +343,7 @@ class Brain(UIMessages):
 
     def deleteQueryEntryById(self, id):
         self.user_queries.pop(id, None)
+        self.ui.reloadQueryEntries(self.user_queries.copy())
 
     def resume(self):
         """ Resumes from suspend. Initializes all interfaces """
