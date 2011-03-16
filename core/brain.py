@@ -105,6 +105,7 @@ def ping_processor(brain):
             synapse.transmit((synapse, err_response))
             synapse.disconnect()
 
+@coroutine
 def query_processor(brain):
     """ process 'query' requests """
     while brain.active:
@@ -327,7 +328,7 @@ def network_cortex(brain):
 
             elif signal.type == 'query':
                 logs.logger.debug("incoming query: %s", signal.content[0])
-                query_target.send((synapse.signal.content))
+                query_target.send((synapse, signal.content))
 
         except ProtocolError, reason:
             logs.logger.debug("network cortex error: %s,%s" %
