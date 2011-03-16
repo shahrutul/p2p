@@ -17,7 +17,7 @@ import time
 import random
 import uuid
 
-from gui_interface import UIMessages, Query
+from gui_interface import UIMessages, Query, QueryTime
 from decorators import coroutine, singleton
 from network_nerve import NetworkNeuron
 from signal_protocol import Signal, ProtocolError
@@ -51,6 +51,17 @@ def ping_sender(brain):
         synapse = brain.network_neuron.connect(neighbour)
         synapse.transmit(Signal('ping', (ping_id, ttl, 0)))
 
+@coroutine
+def query_sender(brain):
+    while brain.active:
+        neighbour, query = (yield)
+        brain.query_cache[query.id] = time_stamp()
+        synapse = brain.network_neuron.connect(neighbour)
+        signal = Signal('query',(query, brain.organ_id[0],
+                                 brain.organ_id[1], network.max_ttl, 0))
+        synapse.transmit(signal)
+        logs.logger.debug("sends query %s to: %s" %(query, str(neighbour)))
+
 
 @coroutine
 def ping_processor(brain):
@@ -68,7 +79,7 @@ def ping_processor(brain):
                 brain.ping_cache[ping_id] = time_stamp()
 
             # check ttl/hops
-            if (0 < ttl < network.max_ttl) and (0 <= hops < network.max_hops):
+            if (0 < ttl <= network.max_ttl) and (0 <= hops < network.max_hops):
                 ttl -= 1
                 hops += 1
             else:
@@ -94,6 +105,46 @@ def ping_processor(brain):
             synapse.transmit((synapse, err_response))
             synapse.disconnect()
 
+def query_processor(brain):
+    """ process 'query' requests """
+    while brain.active:
+        try:
+            synapse, signal = (yield)
+            query, IP, port, ttl, hops = signal
+
+            if query.id in brain.query_cache:
+                logs.logger.debug("discard query request %s" % str(query))
+                synapse.disconnect()
+                continue
+            else:
+                brain.query_cache[query.id] = time_stamp()
+
+            # check ttl/hops
+            if (0 < ttl <= network.max_ttl) and (0 <= hops < network.max_hops):
+                ttl -= 1
+                hops += 1
+            else:
+                continue
+            # compare and send a hit
+            if brain.organ_id:
+                logs.logger.debug("TODO: compare and send a hit!")
+            # send broadcast to neighbours
+            if ttl > 0:
+                for neigh in brain.neighbours.keys():
+                    #if neigh[0] == synapse.organ_id[0]:   # TODO: reenable it for "real world"
+                    #    continue
+                    neigh_synapse = brain.network_neuron.connect(neigh, synapse)
+                    logs.logger.debug("broadcast %s to %s" %(ping, str(neigh)))
+                    neigh_synapse.transmit(Signal('query',
+                                                  (query,IP, port, ttl, hops)))
+            else:
+                synapse.disconnect()
+
+        except ValueError, reason:
+            logs.logger.debug("query processor protocol error %s" % str(reason))
+            err_response = Signal('error', (Signal.ProtocolError, str(reason)))
+            synapse.transmit((synapse, err_response))
+            synapse.disconnect()
 
 @coroutine
 def network_explorer(brain):
@@ -181,7 +232,10 @@ def network_interaction(brain):
     id_resolver = identity_resolver(brain)
     wait_for_ping_cleanup = Wait(network.ping_cache_storage_time)
     wait_for_neighbours_cleanup = Wait(network.cleanup_period)
+    wait_for_query_resend = Wait(network.query_resend_time)
     pinger = ping_sender(brain)
+    query_target = query_sender(brain)
+
     while brain.active:
         yield
         # obtain own adress if not done:
@@ -191,19 +245,27 @@ def network_interaction(brain):
         # check, if enough neighbours or candidates available,
         # else explore the network:
         if len(brain.neighbours) < network.max_neighbours:
-            if len(brain.neigh_candidates):
+            if len(brain.neigh_candidates) > 0:
                 while len(brain.neighbours) < network.max_neighbours and \
                       len(brain.neigh_candidates) > 0:
                     brain.neighbours.update([brain.neigh_candidates.popitem()])
             else:
-                if len(brain.neigh_candidates) < network.min_neighbours:
+                if len(brain.neighbours) < network.min_neighbours:
                     explorer.next()
         # it is time for a cleanup?
-        # remove too old entries from neigh_candidates, neigh_refresh and
-        # ping_cache
+        # remove too old entries from neigh_candidates, neigh_refresh,
+        # ping_cache and query_cache
         if not wait_for_ping_cleanup:
-            wait_for_ping_cleanup = Wait(network.ping_cache_cleanup)
-            brain.ping_cache.cleanup(network.ping_cache_cleanup)
+            wait_for_ping_cleanup = Wait(network.ping_cache_storage_time)
+            brain.ping_cache.cleanup(network.ping_cache_storage_time)
+            brain.query_cache.cleanup(network.query_cache_storage_time)
+
+        # it is time for resending queries?
+        if not wait_for_query_resend:
+            wait_for_query_resend = Wait(network.query_resend_time)
+            for key, query in brain.user_queries.item():
+                if key not in brain.query_cache:
+                    brain.queries_to_send.add(query)
 
         if not wait_for_neighbours_cleanup:
             wait_for_neighbours_cleanup = Wait(network.cleanup_period)
@@ -221,7 +283,16 @@ def network_interaction(brain):
                     logs.logger.debug("sends a refresh ping to %s" %
                                       str(neighbour))
 
-
+        # send outstanding queries
+        if (brain.organ_id and (len(brain.queries_to_send)) > 0
+            and (len(brain.neighbours) >= network.min_neighbours)):
+            for query in list(brain.queries_to_send):
+                brain.queries_to_send.discard(query)
+                for neigh in brain.neighbours.keys():
+                    query_target.send((neigh, query))
+                    wait = Wait(network.query_step_timeout)
+                    while wait:
+                        yield
 @coroutine
 def network_cortex(brain):
     """ process incoming network signals.
@@ -229,6 +300,7 @@ def network_cortex(brain):
     whoami_target = whoami_processor()
     ping_target = ping_processor(brain)
     candidate_target = candidates_processor(brain)
+    query_target = query_processor(brain)
     while brain.active:
         synapse, signal = (yield)
         try:
@@ -252,6 +324,10 @@ def network_cortex(brain):
                     logs.logger.debug("pipes pong to %s" %
                                       str(synapse.signal_target))
                     synapse.signal_target.transmit(signal)
+
+            elif signal.type == 'query':
+                logs.logger.debug("incoming query: %s", signal.content[0])
+                query_target.send((synapse.signal.content))
 
         except ProtocolError, reason:
             logs.logger.debug("network cortex error: %s,%s" %
@@ -323,12 +399,13 @@ class Brain(UIMessages):
     def createNewQueryEntry(self, query):
         if not isinstance(query, Query):
             raise ValueError("not a query!")
-        id_ = uuid.uuid1()
+        id_ = str(uuid.uuid1())
         query.id = id_
         self.user_queries[query.id] = query
         self.queries_to_send.add(query)
         logs.logger.debug("new %s query created: %s" % (query.id, query))
-        self.ui.reloadQueryEntries(self.user_queries.copy())
+        if self.ui is not None:
+            self.ui.reloadQueryEntries(self.user_queries.copy())
 
     def getAllQueryEntries(self):
         return self.user_queries.copy()
@@ -347,8 +424,10 @@ class Brain(UIMessages):
 
     def deleteQueryEntryById(self, id_):
         self.user_queries.pop(id_, None)
+        self.queries_to_send.discard(id_)
         logs.logger.debug("entry %s deleted" % id_)
-        self.ui.reloadQueryEntries(self.user_queries.copy())
+        if self.ui is not None:
+            self.ui.reloadQueryEntries(self.user_queries.copy())
 
     def resume(self):
         """ Resumes from suspend. Initializes all interfaces """
@@ -357,6 +436,7 @@ class Brain(UIMessages):
         self.user_queries = {}
         self.query_results = {}
         self.queries_to_send = set()
+        self.query_cache = {}
         self.interaction_pause = Wait(2)
         self.neigh_candidates = TimeStampDict()
         self.neigh_refresh = TimeStampDict()
@@ -369,6 +449,11 @@ class Brain(UIMessages):
         self.network_neuron = NetworkNeuron(self.network_cortex)
         self.network_interaction = network_interaction(self)
         self.errors_to_ui = errors_to_ui()
+
+        ##dummy data
+        qt = QueryTime(1,0,2,0,['mo'])
+        q = Query("P2P lernen", "ddorf", qt, "gerne auch zu Hause")
+        self.createNewQueryEntry(q)
 
     def suspend(self):
         """ Closes all connections, cleans up and 'suspends'. """
