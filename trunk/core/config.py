@@ -28,6 +28,7 @@ config.settings.store()
 
 import ConfigParser
 import logging
+import logging.handlers
 import sys
 
 
@@ -145,7 +146,8 @@ class Config(_Container):
                   'critical': logging.CRITICAL}
 
         if self.logs.logfile != '':
-            handler = logging.FileHandler(self.logs.logfile)
+            handler = logging.handlers.RotatingFileHandler(
+                self.logs.logfile, maxBytes=100*1024, backupCount=3)
         else:
             handler = logging.StreamHandler(sys.stdout)
         frm = logging.Formatter("%(asctime)s %(levelname)s: %(message)s",
