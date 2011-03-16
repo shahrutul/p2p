@@ -320,10 +320,14 @@ class Brain(UIMessages):
         self.ui = ui
 
 
-    def createNewQueryEntry(self, entry):
-        if not isinstance(entry, Query):
+    def createNewQueryEntry(self, query):
+        if not isinstance(query, Query):
             raise ValueError("not a query!")
-        self.user_queries[uuid.uuid1()] = entry
+        id_ = uuid.uuid1()
+        query.id = id_
+        self.user_queries[query.id] = query
+        self.queries_to_send.add(query)
+        logs.logger.debug("new %s query created: %s" % (query.id, query)
         self.ui.reloadQueryEntries(self.user_queries.copy())
 
     def getAllQueryEntries(self):
@@ -351,6 +355,7 @@ class Brain(UIMessages):
         self.ping_cache = {}
         self.user_queries = {}
         self.query_results = {}
+        self.queries_to_send = set()
         self.interaction_pause = Wait(2)
         self.neigh_candidates = TimeStampDict()
         self.neigh_refresh = TimeStampDict()
