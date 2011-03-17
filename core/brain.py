@@ -611,12 +611,12 @@ if __name__ == "__main__":
     settings.setup_logger(no_file = True)
     brain = Brain()
     try:
+        brain.fallback = True
+        brain.neighbours = TimeStampDict()
+        brain.user_queries = TimeStampDict()
+        brain.query_results = TimeStampDict()
+        brain.queries_to_send = set()
         while True:
-            brain.fallback = True
-            brain.neighbours = TimeStampDict()
-            brain.user_queries = TimeStampDict()
-            brain.query_results = TimeStampDict()
-            brain.queries_to_send = set()
             brain.process()
     except KeyboardInterrupt:
         brain.suspend()
