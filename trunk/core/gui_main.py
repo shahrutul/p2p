@@ -206,21 +206,23 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         
         self.internalReloadEntries(userResults, self.ui.twDetails)
         
-    def pickupChatMsg(self, uuid, chatMessage):
-        if uuid in self.dictMyDetailsWindow:
-            self.dictMyDetailsWindow[uuid].ui.pteChat.insertPlainText(chatMessage)
-            self.dictMyDetailsWindow[uuid].ui.tabs.setCurrentIndex(1)
-            self.dictMyDetailsWindow[uuid].show()
-            #self.dictMyDetailsWindow[uuid].showMinimized()
-            #self.dictMyDetailsWindow[uuid].setWindowState(QtGui.QWindowsStyle.Qt.WindowActive)
-            #self.dictMyDetailsWindow[uuid].showNormal()
+    def pickupChatMsg(self, inQuery, inOppositeNick, inChatMessage, inUuid):
+        #QtGui.QMessageBox.question(self, 'Ueberschrift', inChatMessage, QtGui.QMessageBox.Ok)
+        
+        if inUuid in self.dictMyDetailsWindow:
+            self.dictMyDetailsWindow[inUuid].ui.pteChat.insertPlainText(inChatMessage)
+            self.dictMyDetailsWindow[inUuid].ui.tabs.setCurrentIndex(1)
+            self.dictMyDetailsWindow[inUuid].show()
+            #self.dictMyDetailsWindow[inUuid].showMinimized()
+            #self.dictMyDetailsWindow[inUuid].setWindowState(QtGui.QWindowsStyle.Qt.WindowActive)
+            #self.dictMyDetailsWindow[inUuid].showNormal()
         else:
             self.myDetailsWindow = MyDetailsWindow(self)
-            self.dictMyDetailsWindow[uuid] = self.myDetailsWindow
+            self.dictMyDetailsWindow[inUuid] = self.myDetailsWindow
             
-            self.dictMyDetailsWindow[uuid].ui.tabs.setCurrentIndex(1)
-            self.dictMyDetailsWindow[uuid].ui.pteChat.insertPlainText(chatMessage)
-            self.dictMyDetailsWindow[uuid].show()
+            self.dictMyDetailsWindow[inUuid].ui.tabs.setCurrentIndex(1)
+            self.dictMyDetailsWindow[inUuid].ui.pteChat.insertPlainText(inChatMessage)
+            self.dictMyDetailsWindow[inUuid].show()
             
 
             
@@ -332,16 +334,17 @@ if __name__ == "__main__":
     #myMainWindow.brain.createNewQueryEntry(newQuery)
     
     ''' RESULTS: TESTEINTRAG '''
+    '''
     rList = []
     rList.append(QueryTime.WEEKDAYS[4])
     rNewQueryTime = QueryTime(5, 15, 7, 30, rList)
     rNewQuery = Query("Kaugummi", "HHU", rNewQueryTime, "dies ist eine Testbeschreibung")
     rDict = dict({'a49298d8-4fe9-11e0-a6cb-00166fc3d7af': rNewQuery})
     myMainWindow.reloadResultEntries(rDict)
-    
-    #brainTimer = QtCore.QTimer()
-    #QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
-    #brainTimer.start(100)
+    '''
+    brainTimer = QtCore.QTimer()
+    QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
+    brainTimer.start(100)
     
     myMainWindow.show()    
     sys.exit(app.exec_())
