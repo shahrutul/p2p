@@ -65,12 +65,16 @@ class Query(object):
         self.id = id_
         
     def compare(self, obj):
-        my_title = [keyword.strip() for keyword in self.title.split(',')]
-        other_title = [keyword.strip() for keyword in obj.title.split(',')]
+        my_title = [keyword.strip().lower()
+                    for keyword in self.title.split(',')]
+        other_title = [keyword.strip().lower()
+                       for keyword in obj.title.split(',')]
         if len(set(my_title).intersection(other_title)) == 0:
             return False
-        my_places = [keyword.strip() for keyword in self.place.split(',')]
-        other_places = [keyword.strip() for keyword in obj.place.split(',')]
+        my_places = [keyword.strip().lower()
+                     for keyword in self.place.split(',')]
+        other_places = [keyword.strip().lower()
+                        for keyword in obj.place.split(',')]
         if len(set(my_places).intersection(other_places)) == 0:
             return False
         return self.query_time.compare(obj.query_time)
