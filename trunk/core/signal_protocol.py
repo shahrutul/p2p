@@ -171,7 +171,7 @@ class Signal(object):
     @staticmethod
     def deserialize(data):
         """ Deserializes JSON objects to Signals """
-        logs.logger.debug("convert: %s" % data)
+        #logs.logger.debug("convert: %s" % data)
         try:
             json_obj = json.loads(data, object_hook = decode_query)
             return Signal(json_obj['type'], json_obj['content'])
@@ -185,11 +185,11 @@ class Signal(object):
     def serialize(self):
         """ Converts input to JSON objects
         Returns: JSON representation, e.g """
-        logs.logger.debug("serialize: %s", self)
+        #logs.logger.debug("serialize: %s", self)
         try:
             return json.dumps({'type': self.type,
                                'content': self.content},
                               cls = QueryEncoder) + Signal.TERMINATOR
         except (TypeError), reason:
-            logs.logger.critical("serializer exception, reason %s" % reason)
+            #logs.logger.critical("serializer exception, reason %s" % reason)
             raise ProtocolError(reason)

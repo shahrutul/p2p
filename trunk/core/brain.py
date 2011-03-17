@@ -234,27 +234,24 @@ def network_explorer(brain):
 def identity_resolver(brain):
     """ obtains own network address """
     net_neuron = brain.network_neuron
-    try:
-        while not brain.organ_id:
-            # if there are no neighbours, do noting
-            while len(brain.neighbours) == 0:
-                yield
-            rand_neighbour = random.choice(list(brain.neighbours))
-            synapse = net_neuron.connect(rand_neighbour)
-            synapse.transmit(Signal('whoami', (brain.network_neuron.port)))
-            logs.logger.debug("send a 'whoami' to %s" % unicode(rand_neighbour))
-            wait = Wait(network.wait_for_whoami)
-            while wait and synapse.is_active():
-                yield
-            synapse.disconnect()
-            # TODO: delete or not delete?, that is the question
-            if not brain.organ_id:
-                logs.logger.debug("remove neighbour %s" %
-                                  unicode(rand_neighbour))
-                brain.neighbours.pop(rand_neighbour, None)
-            continue
-    finally:
-        logs.logger.debug("indentity resolver closed")
+    while not brain.organ_id:
+        # if there are no neighbours, do noting
+        while len(brain.neighbours) == 0:
+            yield
+        rand_neighbour = random.choice(list(brain.neighbours))
+        synapse = net_neuron.connect(rand_neighbour)
+        synapse.transmit(Signal('whoami', (brain.network_neuron.port)))
+        logs.logger.debug("send a 'whoami' to %s" % unicode(rand_neighbour))
+        wait = Wait(network.wait_for_whoami)
+        while wait and synapse.is_active():
+            yield
+        synapse.disconnect()
+        # TODO: delete or not delete?, that is the question
+        if not brain.organ_id:
+            logs.logger.debug("remove neighbour %s" %
+                              unicode(rand_neighbour))
+            brain.neighbours.pop(rand_neighbour, None)
+        continue
 
 
 @coroutine
@@ -365,7 +362,7 @@ def network_cortex(brain):
     while brain.active:
         synapse, signal = (yield)
         try:
-            logs.logger.debug("receives data from %s" % synapse)
+            #logs.logger.debug("receives data from %s" % synapse)
             if signal.type == 'whoami':
                 whoami_target.send(synapse)
                 candidate_target.send((synapse, signal))
@@ -486,7 +483,7 @@ class Brain(UIMessages):
         query.id = id_
         self.user_queries[query.id] = query
         self.queries_to_send.add(query)
-        logs.logger.debug("new %s query created: %s" % (query.id, query))
+        #logs.logger.debug("new %s query created: %s" % (query.id, query))
         if self.ui is not None:
             self.ui.reloadQueryEntries(self.user_queries.copy())
 
@@ -517,7 +514,7 @@ class Brain(UIMessages):
                 self.query_results.pop((my_query_id, other), None)
                 refresh = True
 
-        logs.logger.debug("entry %s deleted" % id_)
+        #logs.logger.debug("entry %s deleted" % id_)
         if self.ui is not None:
             self.ui.reloadQueryEntries(self.user_queries.copy())
             if refresh:
