@@ -77,22 +77,15 @@ class Ui_MainWindow(object):
         self.twDetails.headerItem().setText(4, QtGui.QApplication.translate("MainWindow", "Beschreibung", None, QtGui.QApplication.UnicodeUTF8))
         self.twLog.headerItem().setText(0, QtGui.QApplication.translate("MainWindow", "Log", None, QtGui.QApplication.UnicodeUTF8))
 
-
-
         
 class MyMainWindow(QtGui.QMainWindow, BrainMessages):    
     def pbNeuClicked(self):
-        #'''
         self.myNewQueryWindow = MyNewQueryWindow(self)
         self.myNewQueryWindow.setModal(True)
         self.myNewQueryWindow.myIsEdited = False
-        self.myNewQueryWindow.show()
-        #'''
-        #self.pickupChatMsg('a49298d8-4fe9-11e0-a6cb-00166fc3d7af', 'Meine Nachricht...')
-    
+        self.myNewQueryWindow.show()    
     
     def pbBearbeitenClicked(self):
-        #'''
         item = self.ui.twSuche.currentItem()
         if not item:
             return
@@ -122,27 +115,12 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         self.myNewQueryWindow.myUuidToDelete = item.myUuid
         self.myNewQueryWindow.setModal(True)
         self.myNewQueryWindow.show()
-        #'''
-        '''
-        rList = []
-        rList.append(QueryTime.WEEKDAYS[4])
-        rNewQueryTime = QueryTime(5, 15, 7, 30, rList)
-        rNewQuery = Query("Kaugummi", "HHU", rNewQueryTime, "dies ist eine Testbeschreibung")
-        rDict = dict({'a49298d8-4fe9-11e0-a6cb-00166fc3d7af': rNewQuery})
-        self.reloadResultEntries(rDict)
-        '''
         
     def pbEntfernenClicked(self):
-        #'''
         item = self.ui.twSuche.currentItem()
         if not item:
-            #self.log("Kein Item selektiert!")
             return
         self.brain.deleteQueryEntryById(item.myUuid)
-        #'''
-        #dictEmpty = dict()
-        #self.reloadResultEntries(dictEmpty)
-        #self.pickupChatMsg('a49298d8-4fe9-11e0-a6cb-00166fc3d7af', 'Meine Chatnachricht!')
     
     def twDetailsItemDoubleClicked(self, item = None, columnIndex = None):
         item = self.ui.twDetails.currentItem()
@@ -156,32 +134,11 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
             self.myDetailsWindow = MyDetailsWindow(self)
             self.dictMyDetailsWindow[item.myUuid] = self.myDetailsWindow
             
+            # load query-data into new detail-window
+            self.internalLoadDetailWindowData(self.dictMyDetailsWindow[item.myUuid], item.myQuery)
+            
+            # activate "Detail" tab and save UUID in window instance
             self.myDetailsWindow.ui.tabs.setCurrentIndex(0)
-            #self.myDetailsWindow.ui.tabs.setTabText(1, "Chat (1)")
-            
-            self.myDetailsWindow.ui.leTitel.setText(item.myQuery.title)
-            self.myDetailsWindow.ui.leOrt.setText(item.myQuery.place)
-            self.myDetailsWindow.ui.teBeginn.setTime(QtCore.QTime(item.myQuery.query_time.from_hour, item.myQuery.query_time.from_minute,0,0))
-            self.myDetailsWindow.ui.teEnde.setTime(QtCore.QTime(item.myQuery.query_time.until_hour, item.myQuery.query_time.until_minute,0,0))
-            if QueryTime.WEEKDAYS[0] in item.myQuery.query_time.weekdays:
-                self.myDetailsWindow.ui.cbMo.setChecked(True)
-            if QueryTime.WEEKDAYS[1] in item.myQuery.query_time.weekdays:
-                self.myDetailsWindow.ui.cbDi.setChecked(True)
-            if QueryTime.WEEKDAYS[2] in item.myQuery.query_time.weekdays:
-                self.myDetailsWindow.ui.cbMi.setChecked(True)
-            if QueryTime.WEEKDAYS[3] in item.myQuery.query_time.weekdays:
-                self.myDetailsWindow.ui.cbDo.setChecked(True)
-            if QueryTime.WEEKDAYS[4] in item.myQuery.query_time.weekdays:
-                self.myDetailsWindow.ui.cbFr.setChecked(True)
-            if QueryTime.WEEKDAYS[5] in item.myQuery.query_time.weekdays:
-                self.myDetailsWindow.ui.cbSa.setChecked(True)
-            if QueryTime.WEEKDAYS[6] in item.myQuery.query_time.weekdays:
-                self.myDetailsWindow.ui.cbSo.setChecked(True)
-            
-            # load description
-            self.myDetailsWindow.ui.pteBeschreibung.clear()
-            self.myDetailsWindow.ui.pteBeschreibung.insertPlainText(item.myQuery.description)
-            
             self.myDetailsWindow.myUuid = item.myUuid
             self.myDetailsWindow.show()
 
@@ -198,33 +155,59 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         for key, value in self.dictMyDetailsWindow.items():
             if key not in userResults:
                 self.dictMyDetailsWindow[key].close()
-                #del self.dictMyDetailsWindow[key]
             else:
                 self.newDict[key] = value
         
         self.dictMyDetailsWindow = self.newDict
-        
         self.internalReloadEntries(userResults, self.ui.twDetails)
         
     def pickupChatMsg(self, inQuery, inOppositeNick, inChatMessage, inUuid):
-        #QtGui.QMessageBox.question(self, 'Ueberschrift', inChatMessage, QtGui.QMessageBox.Ok)
-        
         if inUuid in self.dictMyDetailsWindow:
             self.dictMyDetailsWindow[inUuid].insertChatMessage(inChatMessage, inOppositeNick)
             self.dictMyDetailsWindow[inUuid].ui.tabs.setCurrentIndex(1)
             self.dictMyDetailsWindow[inUuid].show()
         else:
+            # create new entry and save in dictionary
             self.myDetailsWindow = MyDetailsWindow(self)
             self.dictMyDetailsWindow[inUuid] = self.myDetailsWindow
-            self.dictMyDetailsWindow[inUuid].myUuid = inUuid
             
+            # load query-data into new detail-window
+            self.internalLoadDetailWindowData(self.dictMyDetailsWindow[inUuid], inQuery)
+            
+            # activate "chat"-tab and save UUID in window instance
             self.dictMyDetailsWindow[inUuid].ui.tabs.setCurrentIndex(1)
+            self.dictMyDetailsWindow[inUuid].myUuid = inUuid
             self.dictMyDetailsWindow[inUuid].insertChatMessage(inChatMessage, inOppositeNick)
             self.dictMyDetailsWindow[inUuid].show()
             
 
             
     ''' ##################################################################### '''
+    
+    def internalLoadDetailWindowData(self, inDetailsWindow, inQuery):
+        # set detail data
+        inDetailsWindow.ui.leTitel.setText(inQuery.title)
+        inDetailsWindow.ui.leOrt.setText(inQuery.place)
+        inDetailsWindow.ui.teBeginn.setTime(QtCore.QTime(inQuery.query_time.from_hour, inQuery.query_time.from_minute,0,0))
+        inDetailsWindow.ui.teEnde.setTime(QtCore.QTime(inQuery.query_time.until_hour, inQuery.query_time.until_minute,0,0))
+        if QueryTime.WEEKDAYS[0] in inQuery.query_time.weekdays:
+            inDetailsWindow.ui.cbMo.setChecked(True)
+        if QueryTime.WEEKDAYS[1] in inQuery.query_time.weekdays:
+            inDetailsWindow.ui.cbDi.setChecked(True)
+        if QueryTime.WEEKDAYS[2] in inQuery.query_time.weekdays:
+            inDetailsWindow.ui.cbMi.setChecked(True)
+        if QueryTime.WEEKDAYS[3] in inQuery.query_time.weekdays:
+            inDetailsWindow.ui.cbDo.setChecked(True)
+        if QueryTime.WEEKDAYS[4] in inQuery.query_time.weekdays:
+            inDetailsWindow.ui.cbFr.setChecked(True)
+        if QueryTime.WEEKDAYS[5] in inQuery.query_time.weekdays:
+            inDetailsWindow.ui.cbSa.setChecked(True)
+        if QueryTime.WEEKDAYS[6] in inQuery.query_time.weekdays:
+            inDetailsWindow.ui.cbSo.setChecked(True)
+        # load description
+        inDetailsWindow.ui.pteBeschreibung.clear()
+        inDetailsWindow.ui.pteBeschreibung.insertPlainText(inQuery.description)
+
 
     def internalReloadEntries(self, queries, treeWidget):
         treeWidget.clear()
@@ -324,22 +307,6 @@ if __name__ == "__main__":
     myMainWindow.brain = Brain()
     myMainWindow.brain.registerUI(myMainWindow)
     
-    ''' QUERY: TESTEINTRAG '''
-    #list = []
-    #list.append(QueryTime.WEEKDAYS[2])
-    #newQueryTime = QueryTime(9, 11, 23, 42, list)
-    #newQuery = Query("Test", "Testort", newQueryTime, "Testbeschreibung")
-    #myMainWindow.brain.createNewQueryEntry(newQuery)
-    
-    ''' RESULTS: TESTEINTRAG '''
-    '''
-    rList = []
-    rList.append(QueryTime.WEEKDAYS[4])
-    rNewQueryTime = QueryTime(5, 15, 7, 30, rList)
-    rNewQuery = Query("Kaugummi", "HHU", rNewQueryTime, "dies ist eine Testbeschreibung")
-    rDict = dict({'a49298d8-4fe9-11e0-a6cb-00166fc3d7af': rNewQuery})
-    myMainWindow.reloadResultEntries(rDict)
-    '''
     brainTimer = QtCore.QTimer()
     QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
     brainTimer.start(100)
@@ -347,7 +314,3 @@ if __name__ == "__main__":
     myMainWindow.show()    
     sys.exit(app.exec_())
     
-'''
-        msgBox = QtGui.QMessageBox.question(self, 'Ueberschrift', "Die Nachricht ....", QtGui.QMessageBox.Ok)
-self.ui.twLog.clear()
-'''
