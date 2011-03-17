@@ -163,6 +163,11 @@ class MyDetailsWindow(QtGui.QDialog):
     def tabCurrentChanged(self, id):
         if id == 1:
             self.ui.leNachricht.setFocus()
+            
+    def insertChatMessage(self, inChatMessage, inNick):
+        self.ui.pteChat.insertPlainText("[" + strftime("%H:%M:%S", localtime()) + "] "+ inNick +": " + inChatMessage + "\n")
+        ''' AutoScroll '''
+        self.ui.pteChat.verticalScrollBar().setValue(self.ui.pteChat.verticalScrollBar().maximum())
         
     def pbSendenClicked(self):
         self.chatMessage = self.ui.leNachricht.text()
@@ -171,15 +176,7 @@ class MyDetailsWindow(QtGui.QDialog):
             return
         
         self.parent().brain.sendChatMsg(self.chatMessage, self.myUuid)
-        
-        
-        
-        self.ui.pteChat.insertPlainText("[" + strftime("%H:%M:%S", localtime()) + "] Ich: " + self.chatMessage + "\n")
-        
-        ''' AutoScroll '''
-        self.ui.pteChat.verticalScrollBar().setValue(self.ui.pteChat.verticalScrollBar().maximum())
-        
-        ''' Todo: chatMessage verschicken --> Brain '''
+        self.insertChatMessage(self.chatMessage, self.parent().brain.name)
         
         self.ui.leNachricht.setText("")
         self.ui.leNachricht.setFocus()

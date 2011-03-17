@@ -210,19 +210,16 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         #QtGui.QMessageBox.question(self, 'Ueberschrift', inChatMessage, QtGui.QMessageBox.Ok)
         
         if inUuid in self.dictMyDetailsWindow:
-            self.dictMyDetailsWindow[inUuid].ui.pteChat.insertPlainText(inChatMessage)
+            self.dictMyDetailsWindow[inUuid].insertChatMessage(inChatMessage, inOppositeNick)
             self.dictMyDetailsWindow[inUuid].ui.tabs.setCurrentIndex(1)
             self.dictMyDetailsWindow[inUuid].show()
-            #self.dictMyDetailsWindow[inUuid].showMinimized()
-            #self.dictMyDetailsWindow[inUuid].setWindowState(QtGui.QWindowsStyle.Qt.WindowActive)
-            #self.dictMyDetailsWindow[inUuid].showNormal()
         else:
             self.myDetailsWindow = MyDetailsWindow(self)
             self.dictMyDetailsWindow[inUuid] = self.myDetailsWindow
             self.dictMyDetailsWindow[inUuid].myUuid = inUuid
             
             self.dictMyDetailsWindow[inUuid].ui.tabs.setCurrentIndex(1)
-            self.dictMyDetailsWindow[inUuid].ui.pteChat.insertPlainText(inChatMessage)
+            self.dictMyDetailsWindow[inUuid].insertChatMessage(inChatMessage, inOppositeNick)
             self.dictMyDetailsWindow[inUuid].show()
             
 
