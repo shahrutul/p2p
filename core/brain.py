@@ -18,7 +18,7 @@ import random
 import uuid
 import pickle
 
-from gui_interface import UIMessages, Query, QueryTime
+from gui_interface import UIMessages, Query
 from decorators import coroutine, singleton
 from network_nerve import NetworkNeuron
 from signal_protocol import Signal, ProtocolError
@@ -64,6 +64,27 @@ def query_sender(brain):
         synapse.transmit(signal)
         logs.logger.debug("sends query %s to: %s" %(query, unicode(neighbour)))
 
+@coroutine
+def chat_msg_sender(brain):
+    """ sends chat messages """
+    while brain.active:
+        msg, (my_query_id, subject_id), receiver = (yield)
+        synapse = brain.network_neuron.connect(receiver)
+        signal = Signal('chat', (unicode(msg), my_query_id, subject_id))
+        synapse.transmit(signal)
+        logs.logger.debug("sends chat msg %s to %s" %
+                          (unicode(msg), unicode(receiver)))
+        synapse.disconnect()
+
+@coroutine
+def chat_msg_processor(brain):
+    """ process incoming chat messages """
+    while brain.active:
+        msg, other_query_id, user_query_id = (yield)
+        query = brain.query_results.get(user_query_id, other_query_id)
+        if query and brain.ui:
+            brain.ui.pickupChatMsg(query, unicode(msg),
+                                   (user_query_id, other_query_id))
 
 @coroutine
 def ping_processor(brain):
@@ -119,7 +140,7 @@ def query_filter(brain):
         new_entries = False
         for user_query in brain.user_queries.values():
             if user_query.compare(query):
-                brain.query_results[query.id] = query
+                brain.query_results[(user_query.id, query.id)] = query
                 new_entries = True
         if new_entries:
             brain.notify_ui.send('new results')
@@ -152,9 +173,9 @@ def query_processor(brain, filter):
             if brain.organ_id:
                 for user_query in brain.user_queries.values():
                     if user_query.compare(query):
-                        resp = Signal('query_hit',
-                                      (user_query, brain.organ_id[0],
-                                       brain.organ_id[1]))
+                        resp = Signal(
+                            'query_hit',(user_query, brain.organ_id[0],
+                                         brain.organ_id[1]))
                         synapse.transmit(resp)
                         logs.logger.debug("sends a query hit %s to %s" %
                                        (unicode(user_query), unicode(synapse)))
@@ -167,12 +188,12 @@ def query_processor(brain, filter):
                     neigh_synapse = brain.network_neuron.connect(neigh, synapse)
                     logs.logger.debug("broadcast %s to %s" %
                                       (query, unicode(neigh)))
-                    neigh_synapse.transmit(Signal('query',
-                                                  (query, IP, port, ttl, hops)))
+                    neigh_synapse.transmit(
+                        Signal('query', (query, IP, port, ttl, hops)))
             else:
                 synapse.disconnect()
 
-        except IndexError, reason:
+        except ValueError, reason:
             logs.logger.debug("query processor ProtocolError %s" %
                               unicode(reason))
             err_resp = Signal('error', (Signal.ProtocolError, unicode(reason)))
@@ -336,11 +357,12 @@ def network_cortex(brain):
     candidate_target = candidates_processor(brain)
     query_res_filter = query_filter(brain)
     query_target = query_processor(brain, query_res_filter)
+    chat_target = chat_msg_processor(brain)
 
     while brain.active:
         synapse, signal = (yield)
         try:
-            logs.logger.debug("recieves data from %s" % synapse)
+            logs.logger.debug("receives data from %s" % synapse)
             if signal.type == 'whoami':
                 whoami_target.send(synapse)
                 candidate_target.send((synapse, signal))
@@ -372,6 +394,10 @@ def network_cortex(brain):
                     logs.logger.debug("pipes query_hit to %s" %
                                       unicode(synapse.signal_target))
                     synapse.signal_target.transmit(signal)
+            elif signal.type == 'chat':
+                logs.logger.debug("receives incoming chat message from %s" %
+                                  unicode(synapse))
+                chat_target.send(signal.content)
 
         except ProtocolError, reason:
             logs.logger.debug("network cortex error: %s,%s" %
@@ -462,8 +488,10 @@ class Brain(UIMessages):
     def getDetailResult(self, queryId, resultId):
         return self.query_results[queryId]
 
-    def sendChatMsg(self, msg, receiver):
-        raise NotImplementedError
+    def sendChatMsg(self, msg, id_):
+        query = self.query_results.get(id_)
+        if query:
+            self.chat_msg_sender.send(msg,id_, query.sender)
 
     def deleteQueryEntryById(self, id_):
         self.user_queries.pop(id_, None)
@@ -476,9 +504,10 @@ class Brain(UIMessages):
         """ Resumes from suspend. Initializes all interfaces """
         self.ui = None
         self.ping_cache = {}
-        self.user_queries = self.load_queries()
+        self.user_queries = {}
+
         self.query_results = {}
-        self.queries_to_send = set(self.user_queries.values())
+        self.queries_to_send = set()
         self.query_cache = {}
         self.interaction_pause = Wait(2)
         self.neigh_candidates = TimeStampDict()
@@ -491,7 +520,10 @@ class Brain(UIMessages):
         self.network_cortex = network_cortex(self)
         self.network_neuron = NetworkNeuron(self.network_cortex)
         self.network_interaction = network_interaction(self)
+        self.chat_msg_sender = chat_msg_sender(self)
         self.notify_ui = notify_ui(self)
+
+        self.load_queries()
 
     def suspend(self):
         """ Closes all connections, cleans up and 'suspends'. """
@@ -523,17 +555,19 @@ class Brain(UIMessages):
             # hm, we have a problem!
             #self.errors_to_ui.send("No known neighbours!")
             self.notify_ui.send(('error', "No known neighbours!"))
+            logs.logger.debug("No known neighbours!")
 
     def store_queries(self):
         file_name = settings.queries.user_queries_db
         with open(file_name, "wb") as query_db:
-            pickle.dump(self.user_queries, query_db)
+            pickle.dump(list(self.user_queries.values()), query_db)
 
     def load_queries(self):
         file_name = settings.queries.user_queries_db
         try:
             with open(file_name, "rb") as query_db:
                 queries = pickle.load(query_db)
-                return queries
-        except IOError:
-            return {}
+                for query in queries:
+                    self.createNewQueryEntry(query)
+        except (IOError, EOFError):
+            return []

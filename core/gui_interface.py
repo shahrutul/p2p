@@ -129,6 +129,6 @@ class BrainMessages(object):
     def reloadResultEntries():
         raise NotImplementedError
     
-    def pickupChatMsg():
+    def pickupChatMsg(query, id_, msg):
         raise NotImplementedError
 
