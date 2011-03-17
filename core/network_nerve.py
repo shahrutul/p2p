@@ -126,11 +126,13 @@ class _Synapse(asynchat.async_chat):  # pylint: disable=R0904, W0223
 
     def log(self, message):
         """ Overrides 'log' from asyncore module to produce consistent logs """
-        logs.logger.debug("asyncore log: %s" % message)
+        #logs.logger.debug("asyncore log: %s" % message)
+        pass
 
     def log_info(self, message, msg_type='info'):
         """ Overrides 'log_info' from asyncore module (-> consistent logs) """
-        logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
+        #logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
+        pass
 
 
 class NeuronError(Exception):
@@ -168,11 +170,13 @@ class NetworkNeuron(asyncore.dispatcher):  # pylint: disable=R0904
 
     def log(self, message):
         """ Overrides 'log' from asyncore module to produce consistent logs """
-        logs.logger.debug("asyncore log: %s" % message)
+        #logs.logger.debug("asyncore log: %s" % message)
+        pass
 
     def log_info(self, message, msg_type='info'):
         """ Overrides 'log_info from asyncore module (->consistent logs) """
-        logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
+        #logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
+        pass
 
     def connect(self, organ_id, target=None):  # pylint: disable=W0221
         """ Connects a (free) synapse to an organ """
