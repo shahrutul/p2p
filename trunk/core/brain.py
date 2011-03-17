@@ -526,12 +526,12 @@ class Brain(UIMessages):
     def resume(self):
         """ Resumes from suspend. Initializes all interfaces """
         self.ui = None
-        self.ping_cache = {}
+        self.ping_cache = TimeStampDict()
         self.user_queries = {}
 
         self.query_results = {}
         self.queries_to_send = set()
-        self.query_cache = {}
+        self.query_cache = TimeStampDict()
         self.interaction_pause = Wait(2)
         self.neigh_candidates = TimeStampDict()
         self.neigh_refresh = TimeStampDict()
@@ -591,6 +591,8 @@ class Brain(UIMessages):
             self.err_out.send("No known neighbours!")
 
     def store_queries(self):
+        if len(self.user_queries) == 0:
+            return
         file_name = settings.queries.user_queries_db
         with open(file_name, "wb") as query_db:
             pickle.dump(list(self.user_queries.values()), query_db)
@@ -612,9 +614,9 @@ if __name__ == "__main__":
     try:
         while True:
             brain.fallback = True
-            brain.neighbours = {}
-            brain.user_queries = {}
-            brain.query_results = {}
+            brain.neighbours = TimeStampDict()
+            brain.user_queries = TimeStampDict()
+            brain.query_results = TimeStampDict()
             brain.queries_to_send = set()
             brain.process()
     except KeyboardInterrupt:
