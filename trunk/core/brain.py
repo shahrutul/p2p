@@ -20,7 +20,7 @@ import pickle
 
 from gui_interface import UIMessages, Query
 from decorators import coroutine, singleton
-from network_nerve import NetworkNeuron
+from network_nerve import NetworkNeuron, NeuronError
 from signal_protocol import Signal, ProtocolError
 from config import (network, logs, settings,  # pylint: disable=E0611
                     last_known_neighbours, queries)
@@ -83,6 +83,7 @@ def chat_msg_processor(brain):
     """ process incoming chat messages """
     while brain.active:
         nick, msg, other_query_id, user_query_id = (yield)
+
         query = brain.query_results.get((user_query_id, other_query_id))
         if query and brain.ui:
             brain.ui.pickupChatMsg(query, unicode(nick), unicode(msg),
@@ -419,6 +420,14 @@ def notify_ui(brain):
             continue
         if message == 'new results':
             brain.ui.reloadResultEntries(brain.query_results.copy())
+@coroutine
+def error_out():
+    err  = None
+    while True:
+        last = err
+        err = (yield)
+        if last != err:
+            logs.logger.debug(unicode(err))
 
 
 class Wait():
@@ -497,11 +506,22 @@ class Brain(UIMessages):
             self.chat_msg_sender.send((nick, msg, id_, query.sender))
 
     def deleteQueryEntryById(self, id_):
-        self.user_queries.pop(id_, None)
+        query = self.user_queries.pop(id_, None)
         self.queries_to_send.discard(id_)
+        if not query:
+            return
+
+        refresh = False
+        for (my_query_id, other) in self.query_results.keys():
+            if my_query_id == query.id:
+                self.query_results.pop((my_query_id, other), None)
+                refresh = True
+
         logs.logger.debug("entry %s deleted" % id_)
         if self.ui is not None:
             self.ui.reloadQueryEntries(self.user_queries.copy())
+            if refresh:
+                self.ui.reloadResultEntries(self.query_results.copy())
 
     def resume(self):
         """ Resumes from suspend. Initializes all interfaces """
@@ -519,28 +539,35 @@ class Brain(UIMessages):
         self.organ_id = None
         self.active = True
         self.fallback = False
+        self.err_out = error_out()
         self.neighbours = TimeStampDict(last_known_neighbours.values())
         self.network_cortex = network_cortex(self)
-        self.network_neuron = NetworkNeuron(self.network_cortex)
+        try:
+            self.network_neuron = NetworkNeuron(self.network_cortex)
+        except NeuronError, reason:
+            self.err_out.send(unicode(reason))
         self.network_interaction = network_interaction(self)
         self.chat_msg_sender = chat_msg_sender(self)
         self.notify_ui = notify_ui(self)
         self.load_queries()
         try:
-            name = settings.user.nickname
+            self.name = settings.user.nickname
         except AttributeError:
-            name = None
-        self.name = name
+            self.name = None
 
     def suspend(self):
         """ Closes all connections, cleans up and 'suspends'. """
-        self.active = False
-        self.network_neuron.suspend()
-        self.network_cortex.close()
-        self.network_interaction.close()
         settings.last_known_neighbours = self.neighbours.keys()
         settings.store()
         self.store_queries()
+
+        self.network_neuron.suspend()
+        self.network_cortex.close()
+        self.network_interaction.close()
+        self.err_out.close()
+        self.chat_msg_sender.close()
+        self.notify_ui.close()
+        self.active = False
 
     def process(self, amount=network.default_listen_time):
         """ process incoming signals and generates some active output
@@ -561,7 +588,7 @@ class Brain(UIMessages):
         else:
             # hm, we have a problem!
             #self.errors_to_ui.send("No known neighbours!")
-            self.notify_ui.send(('error', "No known neighbours!"))
+            self.err_out.send("No known neighbours!")
 
     def store_queries(self):
         file_name = settings.queries.user_queries_db
