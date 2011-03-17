@@ -219,6 +219,7 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         else:
             self.myDetailsWindow = MyDetailsWindow(self)
             self.dictMyDetailsWindow[inUuid] = self.myDetailsWindow
+            self.dictMyDetailsWindow[inUuid].myUuid = inUuid
             
             self.dictMyDetailsWindow[inUuid].ui.tabs.setCurrentIndex(1)
             self.dictMyDetailsWindow[inUuid].ui.pteChat.insertPlainText(inChatMessage)
