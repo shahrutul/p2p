@@ -64,7 +64,7 @@ def signal_filter(signal_processor):
             signal = Signal.deserialize(data)
         except ProtocolError, reason:
             # low-level protocol error (e.g transmission of '[1,2' )
-            logs.logger.debug("filter error: %s,%s" % (synapse, reason))
+            #logs.logger.debug("filter error: %s,%s" % (synapse, reason))
             err_response = Signal('error', (Signal.ProtocolError, str(reason)))
             synapse.transmit(err_response)
             synapse.disconnect()
@@ -115,7 +115,7 @@ class _Synapse(asynchat.async_chat):  # pylint: disable=R0904, W0223
     def disconnect(self):
         """ flushes data and closes """
         self.close_when_done()
-        logs.logger.debug("disconnect %s" % self)
+        #logs.logger.debug("disconnect %s" % self)
 
     def __str__(self):
         """ A nice string representation for logging module """
@@ -126,12 +126,12 @@ class _Synapse(asynchat.async_chat):  # pylint: disable=R0904, W0223
 
     def log(self, message):
         """ Overrides 'log' from asyncore module to produce consistent logs """
-        logs.logger.debug("asyncore log: %s" % message)
+        #logs.logger.debug("asyncore log: %s" % message)
 
     def log_info(self, message, msg_type='info'):
         """ Overrides 'log_info' from asyncore module (-> consistent logs) """
-        logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
-
+        #logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
+        pass
 
 class NeuronError(Exception):
     """ Serious/fatal error while creating a neuronal connection """
@@ -168,11 +168,13 @@ class NetworkNeuron(asyncore.dispatcher):  # pylint: disable=R0904
 
     def log(self, message):
         """ Overrides 'log' from asyncore module to produce consistent logs """
-        logs.logger.debug("asyncore log: %s" % message)
-
+        #logs.logger.debug("asyncore log: %s" % message)
+        pass
+    
     def log_info(self, message, msg_type='info'):
         """ Overrides 'log_info from asyncore module (->consistent logs) """
-        logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
+        pass
+       # logs.logger.debug("asyncore log: %s, %s" % (msg_type, message))
 
     def connect(self, organ_id, target=None):  # pylint: disable=W0221
         """ Connects a (free) synapse to an organ """
@@ -184,7 +186,7 @@ class NetworkNeuron(asyncore.dispatcher):  # pylint: disable=R0904
 
     def handle_accept(self):
         sock, organ_id = self.accept()
-        logs.logger.debug("connections: %s" % len(self._map))
+        #logs.logger.debug("connections: %s" % len(self._map))
         _Synapse(sock, organ_id, self.signal_filter)
 
     def feed(self, amount=network.default_listen_time):
