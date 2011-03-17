@@ -213,7 +213,10 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         treeWidget.clear()
         
         ''' Todo: Sortiert ausgeben? '''
-        for key, query in queries.items():
+        entries = list(queries.items())
+        sorted_entries = sorted(entries, cmp=lambda x,y:
+                                cmp(x[1].title.lower(), y[1].title.lower()))
+        for key, query in sorted_entries:
             newItem = QtGui.QTreeWidgetItem(treeWidget)
             
             newItem.setText(0, query.title)
