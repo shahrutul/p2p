@@ -254,7 +254,7 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
             newItem.setText(2, self.newWeekdays)
             newItem.setText(3, query.place)
             
-            self.newDescriptionWithoutReturns = unicode(str(query.description).replace("\n", " "))
+            self.newDescriptionWithoutReturns = unicode(query.description.replace("\n", " "))
             newItem.setText(4, self.newDescriptionWithoutReturns)
             newItem.myUuid = key
             newItem.myQuery = query
