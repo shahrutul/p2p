@@ -559,14 +559,13 @@ class Brain(UIMessages):
         """ Closes all connections, cleans up and 'suspends'. """
         settings.last_known_neighbours = self.neighbours.keys()
         settings.store()
-        self.store_queries()
-
-        self.network_neuron.suspend()
+        self.store_queries()        
         self.network_cortex.close()
         self.network_interaction.close()
         self.err_out.close()
         self.chat_msg_sender.close()
         self.notify_ui.close()
+        self.network_neuron.suspend()
         self.active = False
 
     def process(self, amount=network.default_listen_time):

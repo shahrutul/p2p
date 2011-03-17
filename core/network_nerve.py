@@ -196,3 +196,4 @@ class NetworkNeuron(asyncore.dispatcher):  # pylint: disable=R0904
         """ closes all connections """
         for connection in self._map.values():
             connection.close()
+        self.close()
