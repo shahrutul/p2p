@@ -604,3 +604,18 @@ class Brain(UIMessages):
                     self.createNewQueryEntry(query)
         except (IOError, EOFError):
             return []
+
+if __name__ == "__main__":
+    """ started without GUI => serve only """
+    settings.setup_logger(no_file = True)
+    brain = Brain()
+    try:
+        while True:
+            brain.fallback = True
+            brain.neighbours = {}
+            brain.user_queries = {}
+            brain.query_results = {}
+            brain.queries_to_send = set()
+            brain.process()
+    except KeyboardInterrupt:
+        brain.suspend()
