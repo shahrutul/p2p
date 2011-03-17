@@ -176,7 +176,10 @@ class MyDetailsWindow(QtGui.QDialog):
             return
         
         self.parent().brain.sendChatMsg(self.chatMessage, self.myUuid)
-        self.insertChatMessage(self.chatMessage, self.parent().brain.name)
+        if self.parent().brain.name is None:
+            self.insertChatMessage(self.chatMessage, "Ich")
+        else:
+            self.insertChatMessage(self.chatMessage, self.parent().brain.name)
         
         self.ui.leNachricht.setText("")
         self.ui.leNachricht.setFocus()
