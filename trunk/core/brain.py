@@ -72,7 +72,7 @@ def chat_msg_sender(brain):
         if not nick:
             nick = unicode(brain.organ_id)
         synapse = brain.network_neuron.connect(receiver)
-        signal = Signal('chat', (nick, unicode(msg), my_query_id, subject_id))
+        signal = Signal('chat', (unicode(nick), unicode(msg), my_query_id, subject_id))
         synapse.transmit(signal)
         logs.logger.debug("sends chat msg %s to %s" %
                           (unicode(msg), unicode(receiver)))
@@ -562,7 +562,6 @@ class Brain(UIMessages):
             # hm, we have a problem!
             #self.errors_to_ui.send("No known neighbours!")
             self.notify_ui.send(('error', "No known neighbours!"))
-            logs.logger.debug("No known neighbours!")
 
     def store_queries(self):
         file_name = settings.queries.user_queries_db
