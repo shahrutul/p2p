@@ -83,7 +83,7 @@ def chat_msg_processor(brain):
     """ process incoming chat messages """
     while brain.active:
         nick, msg, other_query_id, user_query_id = (yield)
-        query = brain.query_results.get(user_query_id, other_query_id)
+        query = brain.query_results.get((user_query_id, other_query_id))
         if query and brain.ui:
             brain.ui.pickupChatMsg(query, unicode(nick), unicode(msg),
                                    (user_query_id, other_query_id))
