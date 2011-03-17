@@ -137,7 +137,7 @@ class Config(_Container):
         with open(self.file_name, "w") as cfg_file:
             cfg.write(cfg_file)
 
-    def setup_logger(self):
+    def setup_logger(self, no_file = False):
         """ Creates a logger.Usage: settings.logs.logger.debug('x') """
         levels = {'debug': logging.DEBUG,
                   'info': logging.INFO,
@@ -145,7 +145,7 @@ class Config(_Container):
                   'error': logging.ERROR,
                   'critical': logging.CRITICAL}
 
-        if self.logs.logfile != '':
+        if self.logs.logfile != '' and not no_file:
             handler = logging.handlers.RotatingFileHandler(
                 self.logs.logfile, maxBytes=100*1024, backupCount=3)
         else:
