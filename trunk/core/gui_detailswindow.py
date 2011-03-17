@@ -169,6 +169,11 @@ class MyDetailsWindow(QtGui.QDialog):
         if len(self.chatMessage) <= 0:
             self.ui.leNachricht.setFocus()
             return
+        
+        self.parent().brain.sendChatMsg(self.chatMessage, self.myUuid)
+        
+        
+        
         self.ui.pteChat.insertPlainText("[" + strftime("%H:%M:%S", localtime()) + "] Ich: " + self.chatMessage + "\n")
         
         ''' AutoScroll '''

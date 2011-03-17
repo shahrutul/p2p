@@ -15,9 +15,6 @@ from time import localtime, strftime
 import sys
 import logging
 
-
-from PySide import QtCore, QtGui
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -85,13 +82,17 @@ class Ui_MainWindow(object):
         
 class MyMainWindow(QtGui.QMainWindow, BrainMessages):    
     def pbNeuClicked(self):
+        #'''
         self.myNewQueryWindow = MyNewQueryWindow(self)
         self.myNewQueryWindow.setModal(True)
         self.myNewQueryWindow.myIsEdited = False
         self.myNewQueryWindow.show()
+        #'''
+        #self.pickupChatMsg('a49298d8-4fe9-11e0-a6cb-00166fc3d7af', 'Meine Nachricht...')
     
     
     def pbBearbeitenClicked(self):
+        #'''
         item = self.ui.twSuche.currentItem()
         if not item:
             return
@@ -121,56 +122,68 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         self.myNewQueryWindow.myUuidToDelete = item.myUuid
         self.myNewQueryWindow.setModal(True)
         self.myNewQueryWindow.show()
-    
+        #'''
+        '''
+        rList = []
+        rList.append(QueryTime.WEEKDAYS[4])
+        rNewQueryTime = QueryTime(5, 15, 7, 30, rList)
+        rNewQuery = Query("Kaugummi", "HHU", rNewQueryTime, "dies ist eine Testbeschreibung")
+        rDict = dict({'a49298d8-4fe9-11e0-a6cb-00166fc3d7af': rNewQuery})
+        self.reloadResultEntries(rDict)
+        '''
         
     def pbEntfernenClicked(self):
+        #'''
         item = self.ui.twSuche.currentItem()
         if not item:
             #self.log("Kein Item selektiert!")
             return
         self.brain.deleteQueryEntryById(item.myUuid)
-        
+        #'''
+        #dictEmpty = dict()
+        #self.reloadResultEntries(dictEmpty)
+        #self.pickupChatMsg('a49298d8-4fe9-11e0-a6cb-00166fc3d7af', 'Meine Chatnachricht!')
     
     def twDetailsItemDoubleClicked(self, item = None, columnIndex = None):
         item = self.ui.twDetails.currentItem()
         if not item:
             return
         
-        self.myDetailsWindow = MyDetailsWindow(self)
-        
-        self.myDetailsWindow.ui.tabs.setCurrentIndex(0)
-        ''' Todo: chat(1) wieder rausnehmen '''
-        self.myDetailsWindow.ui.tabs.setTabText(1, "Chat (1)")
-        
-        self.myDetailsWindow.ui.leTitel.setText(item.myQuery.title)
-        self.myDetailsWindow.ui.leOrt.setText(item.myQuery.place)
-        self.myDetailsWindow.ui.teBeginn.setTime(QtCore.QTime(item.myQuery.query_time.from_hour, item.myQuery.query_time.from_minute,0,0))
-        self.myDetailsWindow.ui.teEnde.setTime(QtCore.QTime(item.myQuery.query_time.until_hour, item.myQuery.query_time.until_minute,0,0))
-        if QueryTime.WEEKDAYS[0] in item.myQuery.query_time.weekdays:
-            self.myDetailsWindow.ui.cbMo.setChecked(True)
-        if QueryTime.WEEKDAYS[1] in item.myQuery.query_time.weekdays:
-            self.myDetailsWindow.ui.cbDi.setChecked(True)
-        if QueryTime.WEEKDAYS[2] in item.myQuery.query_time.weekdays:
-            self.myDetailsWindow.ui.cbMi.setChecked(True)
-        if QueryTime.WEEKDAYS[3] in item.myQuery.query_time.weekdays:
-            self.myDetailsWindow.ui.cbDo.setChecked(True)
-        if QueryTime.WEEKDAYS[4] in item.myQuery.query_time.weekdays:
-            self.myDetailsWindow.ui.cbFr.setChecked(True)
-        if QueryTime.WEEKDAYS[5] in item.myQuery.query_time.weekdays:
-            self.myDetailsWindow.ui.cbSa.setChecked(True)
-        if QueryTime.WEEKDAYS[6] in item.myQuery.query_time.weekdays:
-            self.myDetailsWindow.ui.cbSo.setChecked(True)
-        
-
-        
-        # load description
-        self.myDetailsWindow.ui.pteBeschreibung.clear()
-        self.myDetailsWindow.ui.pteBeschreibung.insertPlainText(item.myQuery.description)
-        
-        # the window should know that the item is edited and must be deleted+added
-        self.myDetailsWindow.myIsEdited = True
-        self.myDetailsWindow.myUuidToDelete = item.myUuid
-        self.myDetailsWindow.show()
+        if item.myUuid in self.dictMyDetailsWindow:
+            self.dictMyDetailsWindow.get(item.myUuid).show()
+        else:
+            #...        
+            self.myDetailsWindow = MyDetailsWindow(self)
+            self.dictMyDetailsWindow[item.myUuid] = self.myDetailsWindow
+            
+            self.myDetailsWindow.ui.tabs.setCurrentIndex(0)
+            #self.myDetailsWindow.ui.tabs.setTabText(1, "Chat (1)")
+            
+            self.myDetailsWindow.ui.leTitel.setText(item.myQuery.title)
+            self.myDetailsWindow.ui.leOrt.setText(item.myQuery.place)
+            self.myDetailsWindow.ui.teBeginn.setTime(QtCore.QTime(item.myQuery.query_time.from_hour, item.myQuery.query_time.from_minute,0,0))
+            self.myDetailsWindow.ui.teEnde.setTime(QtCore.QTime(item.myQuery.query_time.until_hour, item.myQuery.query_time.until_minute,0,0))
+            if QueryTime.WEEKDAYS[0] in item.myQuery.query_time.weekdays:
+                self.myDetailsWindow.ui.cbMo.setChecked(True)
+            if QueryTime.WEEKDAYS[1] in item.myQuery.query_time.weekdays:
+                self.myDetailsWindow.ui.cbDi.setChecked(True)
+            if QueryTime.WEEKDAYS[2] in item.myQuery.query_time.weekdays:
+                self.myDetailsWindow.ui.cbMi.setChecked(True)
+            if QueryTime.WEEKDAYS[3] in item.myQuery.query_time.weekdays:
+                self.myDetailsWindow.ui.cbDo.setChecked(True)
+            if QueryTime.WEEKDAYS[4] in item.myQuery.query_time.weekdays:
+                self.myDetailsWindow.ui.cbFr.setChecked(True)
+            if QueryTime.WEEKDAYS[5] in item.myQuery.query_time.weekdays:
+                self.myDetailsWindow.ui.cbSa.setChecked(True)
+            if QueryTime.WEEKDAYS[6] in item.myQuery.query_time.weekdays:
+                self.myDetailsWindow.ui.cbSo.setChecked(True)
+            
+            # load description
+            self.myDetailsWindow.ui.pteBeschreibung.clear()
+            self.myDetailsWindow.ui.pteBeschreibung.insertPlainText(item.myQuery.description)
+            
+            self.myDetailsWindow.myUuid = item.myUuid
+            self.myDetailsWindow.show()
 
     
     ''' ##################################################################### '''
@@ -180,8 +193,37 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
             
             
     def reloadResultEntries(self, userResults):
+        # remove all detail-windows which are not present in userResults
+        self.newDict = dict()
+        for key, value in self.dictMyDetailsWindow.items():
+            if key not in userResults:
+                self.dictMyDetailsWindow[key].close()
+                #del self.dictMyDetailsWindow[key]
+            else:
+                self.newDict[key] = value
+        
+        self.dictMyDetailsWindow = self.newDict
+        
         self.internalReloadEntries(userResults, self.ui.twDetails)
+        
+    def pickupChatMsg(self, uuid, chatMessage):
+        if uuid in self.dictMyDetailsWindow:
+            self.dictMyDetailsWindow[uuid].ui.pteChat.insertPlainText(chatMessage)
+            self.dictMyDetailsWindow[uuid].ui.tabs.setCurrentIndex(1)
+            self.dictMyDetailsWindow[uuid].show()
+            #self.dictMyDetailsWindow[uuid].showMinimized()
+            #self.dictMyDetailsWindow[uuid].setWindowState(QtGui.QWindowsStyle.Qt.WindowActive)
+            #self.dictMyDetailsWindow[uuid].showNormal()
+        else:
+            self.myDetailsWindow = MyDetailsWindow(self)
+            self.dictMyDetailsWindow[uuid] = self.myDetailsWindow
+            
+            self.dictMyDetailsWindow[uuid].ui.tabs.setCurrentIndex(1)
+            self.dictMyDetailsWindow[uuid].ui.pteChat.insertPlainText(chatMessage)
+            self.dictMyDetailsWindow[uuid].show()
+            
 
+            
     ''' ##################################################################### '''
 
     def internalReloadEntries(self, queries, treeWidget):
@@ -248,12 +290,18 @@ class MyMainWindow(QtGui.QMainWindow, BrainMessages):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
+        self.dictMyDetailsWindow = dict()
+        
         ' Signals '
         QtCore.QObject.connect(self.ui.pbNeu, QtCore.SIGNAL('clicked()'), self.pbNeuClicked)
         QtCore.QObject.connect(self.ui.pbBearbeiten, QtCore.SIGNAL('clicked()'), self.pbBearbeitenClicked)
         QtCore.QObject.connect(self.ui.pbEntfernen, QtCore.SIGNAL('clicked()'), self.pbEntfernenClicked)
         QtCore.QObject.connect(self.ui.twSuche, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.pbBearbeitenClicked)
         QtCore.QObject.connect(self.ui.twDetails, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)'), self.twDetailsItemDoubleClicked)
+
+
+    def closeEvent(self, event):
+        self.brain.suspend()
 
 
 class GUILogger(logging.Handler):
@@ -277,11 +325,11 @@ if __name__ == "__main__":
     myMainWindow.brain.registerUI(myMainWindow)
     
     ''' QUERY: TESTEINTRAG '''
-    list = []
-    list.append(QueryTime.WEEKDAYS[2])
-    newQueryTime = QueryTime(9, 11, 23, 42, list)
-    newQuery = Query("Test", "Testort", newQueryTime, "Testbeschreibung")
-    myMainWindow.brain.createNewQueryEntry(newQuery)
+    #list = []
+    #list.append(QueryTime.WEEKDAYS[2])
+    #newQueryTime = QueryTime(9, 11, 23, 42, list)
+    #newQuery = Query("Test", "Testort", newQueryTime, "Testbeschreibung")
+    #myMainWindow.brain.createNewQueryEntry(newQuery)
     
     ''' RESULTS: TESTEINTRAG '''
     rList = []
@@ -289,11 +337,11 @@ if __name__ == "__main__":
     rNewQueryTime = QueryTime(5, 15, 7, 30, rList)
     rNewQuery = Query("Kaugummi", "HHU", rNewQueryTime, "dies ist eine Testbeschreibung")
     rDict = dict({'a49298d8-4fe9-11e0-a6cb-00166fc3d7af': rNewQuery})
-    #myMainWindow.reloadResultEntries(rDict)
+    myMainWindow.reloadResultEntries(rDict)
     
-    brainTimer = QtCore.QTimer()
-    QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
-    brainTimer.start(100)
+    #brainTimer = QtCore.QTimer()
+    #QtCore.QObject.connect(brainTimer, QtCore.SIGNAL("timeout()"), myMainWindow.brain.process)
+    #brainTimer.start(100)
     
     myMainWindow.show()    
     sys.exit(app.exec_())
