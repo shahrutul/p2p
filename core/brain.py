@@ -68,9 +68,11 @@ def query_sender(brain):
 def chat_msg_sender(brain):
     """ sends chat messages """
     while brain.active:
-        msg, (my_query_id, subject_id), receiver = (yield)
+        nick, msg, (my_query_id, subject_id), receiver = (yield)
+        if not nick:
+            nick = unicode(brain.organ_id)
         synapse = brain.network_neuron.connect(receiver)
-        signal = Signal('chat', (unicode(msg), my_query_id, subject_id))
+        signal = Signal('chat', (nick, unicode(msg), my_query_id, subject_id))
         synapse.transmit(signal)
         logs.logger.debug("sends chat msg %s to %s" %
                           (unicode(msg), unicode(receiver)))
@@ -80,10 +82,10 @@ def chat_msg_sender(brain):
 def chat_msg_processor(brain):
     """ process incoming chat messages """
     while brain.active:
-        msg, other_query_id, user_query_id = (yield)
+        nick, msg, other_query_id, user_query_id = (yield)
         query = brain.query_results.get(user_query_id, other_query_id)
         if query and brain.ui:
-            brain.ui.pickupChatMsg(query, unicode(msg),
+            brain.ui.pickupChatMsg(query, unicode(nick), unicode(msg),
                                    (user_query_id, other_query_id))
 
 @coroutine
@@ -490,8 +492,9 @@ class Brain(UIMessages):
 
     def sendChatMsg(self, msg, id_):
         query = self.query_results.get(id_)
+        nick = self.name
         if query:
-            self.chat_msg_sender.send(msg,id_, query.sender)
+            self.chat_msg_sender.send((nick, msg, id_, query.sender))
 
     def deleteQueryEntryById(self, id_):
         self.user_queries.pop(id_, None)
@@ -522,8 +525,12 @@ class Brain(UIMessages):
         self.network_interaction = network_interaction(self)
         self.chat_msg_sender = chat_msg_sender(self)
         self.notify_ui = notify_ui(self)
-
         self.load_queries()
+        try:
+            name = settings.user.nickname
+        except AttributeError:
+            name = None
+        self.name = name
 
     def suspend(self):
         """ Closes all connections, cleans up and 'suspends'. """
