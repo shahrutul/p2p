@@ -144,12 +144,14 @@ class Signal(object):
              }
 
     def __init__(self, type_, content=()):
-        try:
+        'all strings to unicodes'
+        try:            
             arg_types = Signal._types[type_]
             if not hasattr(content, '__iter__'):
                 content = (content,)
+
             if not arg_type_check(arg_types, *content):
-                raise ProtocolError("Expected: %s(%s), not %s(%s)" %
+                raise ProtocolError(u"Expected: %s(%s), not %s(%s)" %
                       (type_, map(lambda obj:
                                   getattr(obj,"__name__"),
                                   arg_types),
@@ -161,7 +163,10 @@ class Signal(object):
         self.content = content
 
     def __str__(self):
-        return "Signal(%s,%s)" % (self.type, self.content)
+        try:
+            return "Signal(%s,%s))" % (self.type, self.content)
+        except UnicodeEncodeError:
+            return "Signal(%s)" % self.type
 
     @staticmethod
     def deserialize(data):

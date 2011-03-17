@@ -80,8 +80,8 @@ class Query(object):
         return self.query_time.compare(obj.query_time)
 
     def __str__(self):
-        return unicode("Title: %s, place: %s" %
-                       (self.title[:15], self.place[:15]))
+        return u"Title: %s, place: %s" %\
+                       (self.title[:15], self.place[:15])
 
     def __repr__(self):
         return unicode(self)
