@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NewQueryWindow</class>
+ <widget class="QDialog" name="NewQueryWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>389</width>
+    <height>407</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Neue Suche</string>
+  </property>
+  <widget class="QPlainTextEdit" name="pteBeschreibung">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>253</y>
+     <width>351</width>
+     <height>91</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbBeschreibung">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>230</y>
+     <width>351</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Beschreibung:</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pbAbbrechen">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>360</y>
+     <width>88</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&amp;Abbrechen</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pbSpeichern">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>360</y>
+     <width>85</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&amp;Speichern</string>
+   </property>
+   <property name="default">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbSo">
+   <property name="geometry">
+    <rect>
+     <x>328</x>
+     <y>180</y>
+     <width>45</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="text">
+    <string>So</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbSa">
+   <property name="geometry">
+    <rect>
+     <x>278</x>
+     <y>180</y>
+     <width>44</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="text">
+    <string>Sa</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbMi">
+   <property name="geometry">
+    <rect>
+     <x>127</x>
+     <y>180</y>
+     <width>44</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="text">
+    <string>Mi</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbDi">
+   <property name="geometry">
+    <rect>
+     <x>79</x>
+     <y>180</y>
+     <width>42</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="text">
+    <string>Di</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbMo">
+   <property name="geometry">
+    <rect>
+     <x>24</x>
+     <y>180</y>
+     <width>49</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="text">
+    <string>Mo</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbDo">
+   <property name="geometry">
+    <rect>
+     <x>177</x>
+     <y>180</y>
+     <width>47</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="text">
+    <string>Do</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbFr">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>180</y>
+     <width>42</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="text">
+    <string>Fr</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbEnde">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>116</y>
+     <width>49</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ende:</string>
+   </property>
+  </widget>
+  <widget class="QTimeEdit" name="teEnde">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>116</y>
+     <width>294</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="time">
+    <time>
+     <hour>12</hour>
+     <minute>0</minute>
+     <second>0</second>
+    </time>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="leTitel">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>17</y>
+     <width>294</width>
+     <height>27</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbBeginn">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>83</y>
+     <width>49</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Beginn:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbTitel">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>17</y>
+     <width>49</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Titel:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbOrt">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>50</y>
+     <width>49</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ort:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="leOrt">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>50</y>
+     <width>294</width>
+     <height>27</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QTimeEdit" name="teBeginn">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>83</y>
+     <width>294</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="time">
+    <time>
+     <hour>11</hour>
+     <minute>0</minute>
+     <second>0</second>
+    </time>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbKalendertage">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>160</y>
+     <width>351</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Kalendertage:</string>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>leTitel</tabstop>
+  <tabstop>leOrt</tabstop>
+  <tabstop>teBeginn</tabstop>
+  <tabstop>teEnde</tabstop>
+  <tabstop>cbMo</tabstop>
+  <tabstop>cbDi</tabstop>
+  <tabstop>cbMi</tabstop>
+  <tabstop>cbDo</tabstop>
+  <tabstop>cbFr</tabstop>
+  <tabstop>cbSa</tabstop>
+  <tabstop>cbSo</tabstop>
+  <tabstop>pteBeschreibung</tabstop>
+  <tabstop>pbAbbrechen</tabstop>
+  <tabstop>pbSpeichern</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
